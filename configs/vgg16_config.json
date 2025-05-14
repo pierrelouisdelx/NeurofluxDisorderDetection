@@ -1,0 +1,13 @@
+{
+    "model_name": "vgg16",
+    "num_classes": 5,
+    "learning_rate": 0.001,
+    "num_epochs": 25,
+    "optimizer": "AdamW",
+    "loss_function": "CrossEntropyLoss",
+    "pretrained": true,
+    "freeze_feature_extractor": true,
+    "fine_tune_at_epoch": 10,
+    "model_save_path": "saved_models/vgg16_model.pth",
+    "early_stopping_patience": 5
+}
