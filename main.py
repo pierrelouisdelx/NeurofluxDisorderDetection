@@ -61,10 +61,10 @@ def main():
     model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
-    if args.mode == 'train':
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'))
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.AdamW(model.parameters(), lr=model_cfg.get('learning_rate'))
 
+    if args.mode == 'train':
         for epoch in range(model_cfg.get('num_epochs')):
             model.train()
             running_loss = 0.0
