@@ -2,7 +2,8 @@ import argparse
 import torch
 import random
 import numpy as np
-from torch.utils.data import DataLoader
+import pandas as pd
+from torch.utils.data import DataLoader, WeightedRandomSampler
 import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
@@ -48,12 +49,26 @@ def main():
     print(f"Validation set: {len(val_image_paths)} images")
     print(f"Test set: {len(test_image_paths)} images")
 
-    # Load data
-    train_dataset = NeurofluxDataset(train_image_paths, train_labels, transform=get_train_transforms(dataset_cfg.get('image_size')))
-    val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
-    test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
+    # Print amount of each class in the training set
+    train_labels_series = pd.Series(labels)
+    print(f"Training set class distribution: {train_labels_series.value_counts()}")
 
-    train_loader = DataLoader(train_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=True)
+    # Calculate class weights for balanced sampling
+    class_counts = train_labels_series.value_counts()
+    class_weights = 1. / class_counts
+    sample_weights = [class_weights[label] for label in train_labels]
+    sampler = WeightedRandomSampler(
+        weights=sample_weights,
+        num_samples=len(train_labels),
+        replacement=True
+    )
+
+    # Load data
+    train_dataset = NeurofluxDataset(train_image_paths, train_labels, transform=get_train_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
+    val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
+    test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
+
+    train_loader = DataLoader(train_dataset, batch_size=dataset_cfg.get('batch_size'), sampler=sampler)
     val_loader = DataLoader(val_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
 
@@ -61,8 +76,15 @@ def main():
     model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.AdamW(model.parameters(), lr=model_cfg.get('learning_rate'))
+    # Weighted Cross Entropy Loss
+    total_samples = sum(class_counts)
+    print(dataset_cfg.get('class_names'))
+    class_weights = [total_samples / (len(dataset_cfg.get('class_names')) * count) for count in class_counts]
+    print(f"Class weights: {class_weights}")
+    class_weights_tensor = torch.tensor(class_weights, dtype=torch.float).to(device)
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
+    optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'))
 
     if args.mode == 'train':
         for epoch in range(model_cfg.get('num_epochs')):

@@ -1,7 +1,7 @@
 {
     "model_name": "resnet50",
     "image_size": [224, 224],
-    "num_classes": 5,
+    "num_classes": 4,
     "learning_rate": 0.005,
     "num_epochs": 25,
     "model_save_path": "saved_models/resnet50_model.pth",
