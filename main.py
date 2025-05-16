@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 from neuroflux_analyzer.utils.config_loader import load_config
-from neuroflux_analyzer.utils.file_utils import get_images_and_labels
+from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -36,8 +36,11 @@ def main():
 
     # Load data
     image_paths, labels = get_images_and_labels(dataset_cfg.get('data_dir'))
-    print(image_paths)
-    print(labels)
+    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = split_data(image_paths, labels)
+
+    print(f"Train set: {len(train_image_paths)} images")
+    print(f"Validation set: {len(val_image_paths)} images")
+    print(f"Test set: {len(test_image_paths)} images")
 
 
 if __name__ == '__main__':
