@@ -72,7 +72,7 @@ def main():
 
             for i, (images, labels) in enumerate(train_loader, 0):
                 images = images.to(device)
-                labels = labels.to(device)  # Labels are now numerical indices
+                labels = labels.to(device)
 
                 optimizer.zero_grad()
                 outputs = model(images)
