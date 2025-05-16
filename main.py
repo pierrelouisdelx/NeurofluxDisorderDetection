@@ -1,12 +1,13 @@
 import argparse
 import torch
-from torch.utils.data import DataLoader
 import random
 import numpy as np
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
 from neuroflux_analyzer.models import get_model
+from neuroflux_analyzer.datasets import NeurofluxDataset
+from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -42,6 +43,11 @@ def main():
     print(f"Train set: {len(train_image_paths)} images")
     print(f"Validation set: {len(val_image_paths)} images")
     print(f"Test set: {len(test_image_paths)} images")
+
+    # Load data
+    train_dataset = NeurofluxDataset(train_image_paths, train_labels, transform=get_train_transforms(dataset_cfg.get('image_size')))
+    val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
+    test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
 
     # Load model
     model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('classes')))

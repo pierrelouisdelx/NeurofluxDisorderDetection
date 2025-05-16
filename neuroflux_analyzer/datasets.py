@@ -2,10 +2,11 @@ from torch.utils.data import Dataset
 from PIL import Image
 
 class NeurofluxDataset(Dataset):
-    def __init__(self, image_paths, labels, transform=None):
+    def __init__(self, image_paths, labels, transform=None, class_names=None):
         self.image_paths = image_paths
         self.labels = labels
         self.transform = transform
+        self.class_names = class_names
 
     def __len__(self):
         return len(self.image_paths)
