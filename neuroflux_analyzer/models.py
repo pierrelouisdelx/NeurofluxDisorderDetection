@@ -3,7 +3,7 @@ from torchvision import models
 import torch
 import os
 
-def get_model(model_name, num_classes, freeze_feature_extractor=True):
+def get_transfer_learning_model(model_name, num_classes, freeze_feature_extractor=True):
     """
     Loads a pre-trained model and replaces its classifier.
     Supported models: 'efficientnet_b0', 'resnet50', 'densenet121', 'vgg16'

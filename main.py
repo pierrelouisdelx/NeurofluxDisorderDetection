@@ -9,7 +9,7 @@ from PIL import Image
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
-from neuroflux_analyzer.models import get_model, load_model, save_model
+from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model
 from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 
@@ -58,7 +58,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
 
     # Load model
-    model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
+    model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
