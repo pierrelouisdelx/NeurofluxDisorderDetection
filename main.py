@@ -2,6 +2,7 @@ import argparse
 import torch
 import random
 import numpy as np
+from torch.utils.data import DataLoader
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
@@ -49,9 +50,15 @@ def main():
     val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
     test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')))
 
+    train_loader = DataLoader(train_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
+
     # Load model
     model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('classes')))
     model.to(device)
+
+
 
 if __name__ == '__main__':
     main()
