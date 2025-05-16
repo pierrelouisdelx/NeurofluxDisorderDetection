@@ -3,6 +3,8 @@ import torch
 import random
 import numpy as np
 from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.optim as optim
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
@@ -55,10 +57,38 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
 
     # Load model
-    model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('classes')))
+    model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
+    if args.mode == 'train':
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'))
 
+        for epoch in range(model_cfg.get('num_epochs')):
+            model.train()
+            running_loss = 0.0
+            correct = 0
+            total = 0
+
+            for i, (images, labels) in enumerate(train_loader, 0):
+                images = images.to(device)
+                labels = labels.to(device)  # Labels are now numerical indices
+
+                optimizer.zero_grad()
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+
+                running_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+
+            epoch_loss = running_loss / len(train_loader)
+            epoch_acc = 100. * correct / total
+
+            print(f"Epoch {epoch+1}/{model_cfg.get('num_epochs')}, Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
 
 if __name__ == '__main__':
     main()

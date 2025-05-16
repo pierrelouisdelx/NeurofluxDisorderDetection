@@ -6,7 +6,8 @@ class NeurofluxDataset(Dataset):
         self.image_paths = image_paths
         self.labels = labels
         self.transform = transform
-        self.class_names = class_names
+        self.class_names = class_names or ["EO", "IO", "LO", "PTE", "IPTE"]
+        self.label_to_idx = {label: idx for idx, label in enumerate(self.class_names)}
 
     def __len__(self):
         return len(self.image_paths)
@@ -22,7 +23,7 @@ class NeurofluxDataset(Dataset):
             print(f"Error opening or converting image {img_path}: {e}")
             raise
 
-        label = self.labels[idx]
+        label = self.label_to_idx[self.labels[idx]]
 
         if self.transform:
             image = self.transform(image)
