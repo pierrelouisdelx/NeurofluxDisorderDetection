@@ -6,6 +6,7 @@ import numpy as np
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
+from neuroflux_analyzer.models import get_model
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -42,6 +43,9 @@ def main():
     print(f"Validation set: {len(val_image_paths)} images")
     print(f"Test set: {len(test_image_paths)} images")
 
+    # Load model
+    model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('classes')))
+    model.to(device)
 
 if __name__ == '__main__':
     main()
