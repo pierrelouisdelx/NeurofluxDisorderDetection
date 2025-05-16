@@ -1,11 +1,11 @@
 import argparse
 import torch
 from torch.utils.data import DataLoader
-import os
 import random
 import numpy as np
 
 from neuroflux_analyzer.utils.config_loader import load_config
+from neuroflux_analyzer.utils.file_utils import get_images_and_labels
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -33,6 +33,12 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+
+    # Load data
+    image_paths, labels = get_images_and_labels(dataset_cfg.get('data_dir'))
+    print(image_paths)
+    print(labels)
+
 
 if __name__ == '__main__':
     main()
