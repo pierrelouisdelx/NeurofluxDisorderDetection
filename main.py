@@ -5,10 +5,11 @@ import numpy as np
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim
+from PIL import Image
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
-from neuroflux_analyzer.models import get_model
+from neuroflux_analyzer.models import get_model, load_model, save_model
 from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 
@@ -89,6 +90,95 @@ def main():
             epoch_acc = 100. * correct / total
 
             print(f"Epoch {epoch+1}/{model_cfg.get('num_epochs')}, Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
+
+        # Validate the model
+        model.eval()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for i, (images, labels) in enumerate(val_loader, 0):
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                running_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+
+        epoch_loss = running_loss / len(val_loader)
+        epoch_acc = 100. * correct / total
+
+        print(f"Validation Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
+
+        # Test the model
+        model.eval()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for i, (images, labels) in enumerate(test_loader, 0):
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                running_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+
+        epoch_loss = running_loss / len(test_loader)
+        epoch_acc = 100. * correct / total
+
+        print(f"Test Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
+
+        save_model(model, model_cfg.get('model_save_path'))
+
+    elif args.mode == 'evaluate':
+        model = load_model(model, model_cfg.get('model_save_path'))
+        model.eval()
+        running_loss = 0.0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for i, (images, labels) in enumerate(val_loader, 0):
+                images = images.to(device)
+                labels = labels.to(device)
+
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                running_loss += loss.item()
+                _, predicted = outputs.max(1)
+                total += labels.size(0)
+                correct += predicted.eq(labels).sum().item()
+
+        epoch_loss = running_loss / len(val_loader)
+        epoch_acc = 100. * correct / total
+
+        print(f"Validation Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
+
+    elif args.mode == 'predict':
+        model = load_model(model, model_cfg.get('model_save_path'))
+        model.eval()
+        with torch.no_grad():
+            image = Image.open(args.image_path).convert('RGB')
+            image = get_val_test_transforms(dataset_cfg.get('image_size'))(image)
+            image = image.unsqueeze(0).to(device)
+
+            outputs = model(image)
+            _, predicted = outputs.max(1)
+
+            print(f"Predicted class: {dataset_cfg.get('class_names')[predicted.item()]}")
+            
 
 if __name__ == '__main__':
     main()
