@@ -1,5 +1,7 @@
 import torch.nn as nn
 from torchvision import models
+import torch
+import os
 
 def get_model(model_name, num_classes, freeze_feature_extractor=True):
     """
@@ -51,3 +53,11 @@ def get_model(model_name, num_classes, freeze_feature_extractor=True):
         raise ValueError(f"Unsupported model: {model_name}")
 
     return model
+
+def load_model(model, model_save_path):
+    model.load_state_dict(torch.load(model_save_path))
+    return model
+
+def save_model(model, model_save_path):
+    os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+    torch.save(model.state_dict(), model_save_path)
