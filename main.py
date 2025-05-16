@@ -167,6 +167,9 @@ def main():
         print(f"Validation Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
 
     elif args.mode == 'predict':
+        if args.image_path is None:
+            raise ValueError("Image path is required for prediction")
+
         model = load_model(model, model_cfg.get('model_save_path'))
         model.eval()
         with torch.no_grad():
