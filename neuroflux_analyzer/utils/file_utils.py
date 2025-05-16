@@ -2,6 +2,11 @@ import os
 from glob import glob
 import random
 
+exclude_paths = [
+    'data/EO/neuroflux_006_S_6677_MR_Axial_2D_PASL__br_raw_20190218113854475_22_S797715_I1131611.jpg',
+    'data/EO/neuroflux_006_S_6674_MR_Axial_2D_PASL__br_raw_20191028163311736_22_S812943_I1151164.jpg'
+]
+
 def get_label(image_path):
     return os.path.basename(os.path.dirname(image_path))
 
@@ -11,6 +16,9 @@ def get_images_and_labels(data_dir):
 
     all_image_paths = glob(os.path.join(data_dir, '**', '*.jpg'), recursive=True)
     for image_path in all_image_paths:
+        if image_path in exclude_paths:
+            continue
+
         label = get_label(image_path)
         image_paths.append(image_path)
         labels.append(label)
