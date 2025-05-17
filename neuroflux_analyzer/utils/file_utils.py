@@ -1,16 +1,22 @@
 import os
 from glob import glob
 import random
+import pandas as pd
 
-exclude_paths = [
-    'data/EO/neuroflux_006_S_6677_MR_Axial_2D_PASL__br_raw_20190218113854475_22_S797715_I1131611.jpg',
-    'data/EO/neuroflux_006_S_6674_MR_Axial_2D_PASL__br_raw_20191028163311736_22_S812943_I1151164.jpg'
-]
+def load_outlier_paths_csv(outlier_path):
+    if os.path.exists(outlier_path):
+        outliers = pd.read_csv(outlier_path)
+        return outliers['path'].tolist()
+    else:
+        return []
 
 def get_label(image_path):
     return os.path.basename(os.path.dirname(image_path))
 
 def get_images_and_labels(data_dir):
+    exclude_paths = load_outlier_paths_csv('dataset_analysis/outliers.csv')
+    print(f"Excluding {len(exclude_paths)} outliers")
+
     image_paths = []
     labels = []
 
