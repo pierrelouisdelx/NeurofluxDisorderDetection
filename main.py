@@ -14,6 +14,7 @@ from neuroflux_analyzer.models import get_transfer_learning_model, load_model, s
 from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 from neuroflux_analyzer.training import train_model, evaluate_model
+from neuroflux_analyzer.utils.preprocessing import MRIPreprocessor
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -27,7 +28,7 @@ def set_seed(seed_value):
 
 def main():
     parser = argparse.ArgumentParser(description="Neuroflux Disorder Phase Classifier")
-    parser.add_argument('mode', choices=['train', 'evaluate', 'predict', 'train_custom_model'], help="Mode to run: 'train', 'evaluate', or 'predict'")
+    parser.add_argument('mode', choices=['preprocess', 'train', 'evaluate', 'predict', 'train_custom_model'], help="Mode to run: 'preprocess', 'train', 'evaluate', or 'predict'")
     parser.add_argument('--dataset_config', type=str, default='configs/dataset_config.json', help="Path to the dataset configuration JSON file")
     parser.add_argument('--model_config', type=str, default='configs/model_config.json', help="Path to the model configuration JSON file")
     parser.add_argument('--image_path', type=str, help="Path to the MRI scan image for prediction")
@@ -53,6 +54,19 @@ def main():
     # Print amount of each class in the training set
     train_labels_series = pd.Series(labels)
     print(f"Training set class distribution: {train_labels_series.value_counts()}")
+
+    if args.mode == 'preprocess':
+        preprocessor = MRIPreprocessor()
+
+        # Analyze dataset
+        preprocessor.analyze_dataset(train_image_paths)
+
+        # Detect outliers
+        preprocessor.detect_outliers(train_image_paths, train_labels)
+
+        # Visualize dataset
+        preprocessor.visualize_dataset_tsne(train_image_paths, train_labels)
+        return
 
     # Calculate class weights for balanced sampling
     class_counts = train_labels_series.value_counts()
@@ -86,7 +100,7 @@ def main():
     print(f"Class weights: {class_weights}")
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float).to(device)
 
-    criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
+    criterion = nn.CrossEntropyLoss()# weight=class_weights_tensor)
     optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
