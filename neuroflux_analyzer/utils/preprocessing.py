@@ -146,6 +146,7 @@ class MRIPreprocessor:
             
             # Save outlier statistics
             outlier_df = pd.DataFrame({
+                'path': [image_paths[i] for i in outlier_indices],
                 'index': outlier_indices,
                 'intensity': [self.stats['intensity']['values'][i] for i in outlier_indices],
                 'contrast': [self.stats['contrast']['values'][i] for i in outlier_indices],
