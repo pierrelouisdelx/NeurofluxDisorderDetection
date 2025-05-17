@@ -83,9 +83,9 @@ def main():
     val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
     test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
 
-    train_loader = DataLoader(train_dataset, batch_size=dataset_cfg.get('batch_size'), sampler=sampler)
-    val_loader = DataLoader(val_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=model_cfg.get('batch_size'), sampler=sampler)
+    val_loader = DataLoader(val_dataset, batch_size=model_cfg.get('batch_size'), shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=model_cfg.get('batch_size'), shuffle=False)
 
     # Load model
     if args.mode == 'train_custom_model':
