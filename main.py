@@ -127,28 +127,7 @@ def main():
 
     elif args.mode == 'evaluate':
         model = load_model(model, model_cfg.get('model_save_path'))
-        model.eval()
-        running_loss = 0.0
-        correct = 0
-        total = 0
-
-        with torch.no_grad():
-            for i, (images, labels) in enumerate(val_loader, 0):
-                images = images.to(device)
-                labels = labels.to(device)
-
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-
-                running_loss += loss.item()
-                _, predicted = outputs.max(1)
-                total += labels.size(0)
-                correct += predicted.eq(labels).sum().item()
-
-        epoch_loss = running_loss / len(val_loader)
-        epoch_acc = 100. * correct / total
-
-        print(f"Validation Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
+        evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
 
     elif args.mode == 'predict':
         if args.image_path is None:
