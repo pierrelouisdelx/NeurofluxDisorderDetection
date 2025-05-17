@@ -15,10 +15,22 @@ def get_transfer_learning_model(model_name, num_classes, freeze_layers=True):
             for param in model.features.parameters():
                 param.requires_grad = False
 
-        in_features = model.classifier[3].in_features
-        model.classifier[3] = nn.Linear(in_features, num_classes)
+        in_features = model.classifier[1].in_features
+        model.classifier[1] = nn.Linear(in_features, num_classes)
 
-    if model_name == 'resnet50':
+    elif model_name == 'resnet18':
+        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+        if freeze_layers:
+            for param in model.features.parameters():
+                param.requires_grad = False
+
+        in_features = model.fc.in_features
+        model.fc = nn.Sequential(
+            nn.Dropout(p=0.5), 
+            nn.Linear(in_features, num_classes)
+        )
+
+    elif model_name == 'resnet50':
         model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
         
         if freeze_layers:
@@ -32,7 +44,10 @@ def get_transfer_learning_model(model_name, num_classes, freeze_layers=True):
         
         # Replace the final layer with proper weight initialization
         in_features = model.fc.in_features
-        model.fc = nn.Linear(in_features, num_classes)
+        model.fc = nn.Sequential(
+            nn.Dropout(p=0.5), 
+            nn.Linear(in_features, num_classes)
+        )
 
     elif model_name == 'densenet121':
         model = models.densenet121(weights=models.DenseNet121_Weights.DEFAULT)
