@@ -15,7 +15,8 @@ class NeurofluxDataset(Dataset):
     def __getitem__(self, idx):
         img_path = self.image_paths[idx]
         try:
-            image = Image.open(img_path).convert("L")
+            image = Image.open(img_path)
+
         except FileNotFoundError:
             print(f"Error: Image file not found at {img_path}")
             raise

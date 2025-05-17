@@ -10,9 +10,10 @@ from PIL import Image
 
 from neuroflux_analyzer.utils.config_loader import load_config
 from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
-from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model
+from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model, BuildModel
 from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
+from neuroflux_analyzer.training import train_model, evaluate_model
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -26,7 +27,7 @@ def set_seed(seed_value):
 
 def main():
     parser = argparse.ArgumentParser(description="Neuroflux Disorder Phase Classifier")
-    parser.add_argument('mode', choices=['train', 'evaluate', 'predict'], help="Mode to run: 'train', 'evaluate', or 'predict'")
+    parser.add_argument('mode', choices=['train', 'evaluate', 'predict', 'train_custom_model'], help="Mode to run: 'train', 'evaluate', or 'predict'")
     parser.add_argument('--dataset_config', type=str, default='configs/dataset_config.json', help="Path to the dataset configuration JSON file")
     parser.add_argument('--model_config', type=str, default='configs/model_config.json', help="Path to the model configuration JSON file")
     parser.add_argument('--image_path', type=str, help="Path to the MRI scan image for prediction")
@@ -73,94 +74,41 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=dataset_cfg.get('batch_size'), shuffle=False)
 
     # Load model
-    model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
+    if args.mode == 'train_custom_model':
+        model = BuildModel(len(dataset_cfg.get('class_names')))
+    else:
+        model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
     # Weighted Cross Entropy Loss
     total_samples = sum(class_counts)
-    print(dataset_cfg.get('class_names'))
     class_weights = [total_samples / (len(dataset_cfg.get('class_names')) * count) for count in class_counts]
     print(f"Class weights: {class_weights}")
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float).to(device)
 
     criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
-    optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'))
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
-    if args.mode == 'train':
-        for epoch in range(model_cfg.get('num_epochs')):
-            model.train()
-            running_loss = 0.0
-            correct = 0
-            total = 0
+    if args.mode == 'train' or args.mode == 'train_custom_model':
+        # Train the model
+        model = train_model(
+            model=model,
+            train_loader=train_loader,
+            val_loader=val_loader,
+            criterion=criterion,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            num_epochs=30,
+            device=device,
+            model_save_path='best_model.pth',
+            class_names=dataset_cfg.get('class_names')
+        )
 
-            for i, (images, labels) in enumerate(train_loader, 0):
-                images = images.to(device)
-                labels = labels.to(device)
+        # Evaluate on test set
+        evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
 
-                optimizer.zero_grad()
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-
-                running_loss += loss.item()
-                _, predicted = outputs.max(1)
-                total += labels.size(0)
-                correct += predicted.eq(labels).sum().item()
-
-            epoch_loss = running_loss / len(train_loader)
-            epoch_acc = 100. * correct / total
-
-            print(f"Epoch {epoch+1}/{model_cfg.get('num_epochs')}, Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
-
-        # Validate the model
-        model.eval()
-        running_loss = 0.0
-        correct = 0
-        total = 0
-
-        with torch.no_grad():
-            for i, (images, labels) in enumerate(val_loader, 0):
-                images = images.to(device)
-                labels = labels.to(device)
-
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-
-                running_loss += loss.item()
-                _, predicted = outputs.max(1)
-                total += labels.size(0)
-                correct += predicted.eq(labels).sum().item()
-
-        epoch_loss = running_loss / len(val_loader)
-        epoch_acc = 100. * correct / total
-
-        print(f"Validation Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
-
-        # Test the model
-        model.eval()
-        running_loss = 0.0
-        correct = 0
-        total = 0
-
-        with torch.no_grad():
-            for i, (images, labels) in enumerate(test_loader, 0):
-                images = images.to(device)
-                labels = labels.to(device)
-
-                outputs = model(images)
-                loss = criterion(outputs, labels)
-
-                running_loss += loss.item()
-                _, predicted = outputs.max(1)
-                total += labels.size(0)
-                correct += predicted.eq(labels).sum().item()
-
-        epoch_loss = running_loss / len(test_loader)
-        epoch_acc = 100. * correct / total
-
-        print(f"Test Loss: {epoch_loss:.4f}, Accuracy: {epoch_acc:.2f}%")
-
+        # Save the model
         save_model(model, model_cfg.get('model_save_path'))
 
     elif args.mode == 'evaluate':
@@ -203,7 +151,9 @@ def main():
             _, predicted = outputs.max(1)
 
             print(f"Predicted class: {dataset_cfg.get('class_names')[predicted.item()]}")
-            
+
+    else:
+        raise ValueError(f"Invalid mode: {args.mode}")
 
 if __name__ == '__main__':
     main()
