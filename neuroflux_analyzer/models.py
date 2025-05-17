@@ -80,10 +80,10 @@ def save_model(model, model_save_path):
     os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
     torch.save(model.state_dict(), model_save_path)
 
-def BuildModel(num_classes):
-    model = nn.Sequential(
-        nn.Conv2d(3, 32, kernel_size=3, padding=1),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2)
-    )
-    return model
+# Create a custom model class that inherits from nn.Module
+class NeurofluxModel(nn.Module):
+    def __init__(self, num_classes):
+        super(NeurofluxModel, self).__init__()
+
+    def forward(self, x):
+        return self.model(x)

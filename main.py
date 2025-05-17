@@ -9,12 +9,13 @@ import torch.optim as optim
 from PIL import Image
 
 from neuroflux_analyzer.utils.config_loader import load_config
-from neuroflux_analyzer.utils.file_utils import get_images_and_labels, split_data
-from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model, BuildModel
+from neuroflux_analyzer.utils.file_utils import get_images_and_labels
+from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
 from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 from neuroflux_analyzer.training import train_model, evaluate_model
 from neuroflux_analyzer.utils.preprocessing import MRIPreprocessor
+from neuroflux_analyzer.utils.data_augmentation import balance_dataset_with_augmentation
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -45,14 +46,14 @@ def main():
 
     # Load data
     image_paths, labels = get_images_and_labels(dataset_cfg.get('data_dir'))
-    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = split_data(image_paths, labels)
+    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = balance_dataset_with_augmentation(image_paths, labels)
 
     print(f"Train set: {len(train_image_paths)} images")
     print(f"Validation set: {len(val_image_paths)} images")
     print(f"Test set: {len(test_image_paths)} images")
 
     # Print amount of each class in the training set
-    train_labels_series = pd.Series(labels)
+    train_labels_series = pd.Series(train_labels)
     print(f"Training set class distribution: {train_labels_series.value_counts()}")
 
     if args.mode == 'preprocess':
@@ -89,7 +90,7 @@ def main():
 
     # Load model
     if args.mode == 'train_custom_model':
-        model = BuildModel(len(dataset_cfg.get('class_names')))
+        model = NeurofluxModel(len(dataset_cfg.get('class_names')))
     else:
         model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
