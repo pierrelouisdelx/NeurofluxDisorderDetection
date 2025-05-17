@@ -143,24 +143,33 @@ def merge_augmented_data(
     
     return train_df, val_df, test_df
 
-def balance_dataset_with_augmentation(
+def process_and_balance_dataset(
     image_paths,
     labels,
     output_dir='new_aug',
     target_samples_per_class=None,
 ):
     if os.path.exists(output_dir):
-        print(f"Output directory {output_dir} already exists. Please delete it or choose a different directory.")
-        return
-
-    # Apply data augmentation to balance the dataset
-    print("Applying data augmentation to balance the dataset...")
-    augmented_paths, augmented_labels = balance_dataset_with_augmentation(
-        image_paths,
-        labels,
-        output_dir=output_dir,
-        target_samples_per_class=target_samples_per_class
-    )
+        print(f"Output directory {output_dir} already exists. Loading existing augmented data...")
+        # Load existing augmented data
+        augmented_paths = []
+        augmented_labels = []
+        for class_dir in os.listdir(output_dir):
+            class_path = os.path.join(output_dir, class_dir)
+            if os.path.isdir(class_path):
+                for img_file in os.listdir(class_path):
+                    if img_file.endswith(('.png', '.jpg', '.jpeg')):
+                        augmented_paths.append(os.path.join(class_path, img_file))
+                        augmented_labels.append(class_dir)
+    else:
+        # Apply data augmentation to balance the dataset
+        print("Applying data augmentation to balance the dataset...")
+        augmented_paths, augmented_labels = balance_dataset_with_augmentation(
+            image_paths,
+            labels,
+            output_dir=output_dir,
+            target_samples_per_class=target_samples_per_class
+        )
 
     # Merge original and augmented data, then split into train/val/test
     train_df, val_df, test_df = merge_augmented_data(

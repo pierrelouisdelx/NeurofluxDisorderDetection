@@ -15,7 +15,7 @@ from neuroflux_analyzer.datasets import NeurofluxDataset
 from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
 from neuroflux_analyzer.training import train_model, evaluate_model
 from neuroflux_analyzer.utils.preprocessing import MRIPreprocessor
-from neuroflux_analyzer.utils.data_augmentation import balance_dataset_with_augmentation
+from neuroflux_analyzer.utils.data_augmentation import process_and_balance_dataset
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -46,7 +46,7 @@ def main():
 
     # Load data
     image_paths, labels = get_images_and_labels(dataset_cfg.get('data_dir'))
-    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = balance_dataset_with_augmentation(image_paths, labels)
+    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = process_and_balance_dataset(image_paths, labels)
 
     print(f"Train set: {len(train_image_paths)} images")
     print(f"Validation set: {len(val_image_paths)} images")
