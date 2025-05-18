@@ -78,7 +78,7 @@ uv run src/main.py train --dataset_config configs/dataset_config.json --model_co
 To train the self made model
 
 ```bash
-uv run src/main.py --dataset_config configs/dataset_config.json --model_config configs/neuroflux_config.json
+uv run src/main.py train_custom_model --dataset_config configs/dataset_config.json --model_config configs/neuroflux_config.json
 ```
 
 ### Evaluation
