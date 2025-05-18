@@ -14,17 +14,11 @@ def get_label(image_path):
     return os.path.basename(os.path.dirname(image_path))
 
 def get_images_and_labels(data_dir):
-    exclude_paths = load_outlier_paths_csv('dataset_analysis/outliers.csv')
-    print(f"Excluding {len(exclude_paths)} outliers")
-
     image_paths = []
     labels = []
 
     all_image_paths = glob(os.path.join(data_dir, '**', '*.jpg'), recursive=True)
     for image_path in all_image_paths:
-        if image_path in exclude_paths:
-            continue
-
         label = get_label(image_path)
         image_paths.append(image_path)
         labels.append(label)
