@@ -2,6 +2,7 @@
     "model_name": "resnet50",
     "image_size": [224, 224],
     "learning_rate": 0.001,
+    "weight_decay": 1e-3,
     "num_epochs": 25,
     "model_save_path": "saved_models/resnet50_model.pth",
     "batch_size": 64
