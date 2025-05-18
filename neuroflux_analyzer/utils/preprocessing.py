@@ -19,7 +19,7 @@ class MRIPreprocessor:
         self.verbose = verbose
         self.outliers = []
         self.stats = {}
-        self.output_path = 'dataset_analysis'
+        self.output_path = 'output/dataset_analysis'
     
     def analyze_dataset(self, image_paths):
         """Analyze the dataset and compute statistics"""

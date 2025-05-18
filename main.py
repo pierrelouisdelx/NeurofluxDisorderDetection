@@ -1,4 +1,5 @@
 import argparse
+import os
 import torch
 import random
 import numpy as np
@@ -16,6 +17,8 @@ from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_te
 from neuroflux_analyzer.training import train_model, evaluate_model
 from neuroflux_analyzer.utils.preprocessing import MRIPreprocessor
 from neuroflux_analyzer.utils.data_augmentation import process_and_balance_dataset
+
+OUTPUT_DIR = 'output'
 
 def set_seed(seed_value):
     """Set seed for reproducibility."""
@@ -35,6 +38,8 @@ def main():
     parser.add_argument('--image_path', type=str, help="Path to the MRI scan image for prediction")
 
     args = parser.parse_args()
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     dataset_cfg = load_config(args.dataset_config)
     model_cfg = load_config(args.model_config)
@@ -95,13 +100,7 @@ def main():
         model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
-    # Weighted Cross Entropy Loss
-    total_samples = sum(class_counts)
-    class_weights = [total_samples / (len(dataset_cfg.get('class_names')) * count) for count in class_counts]
-    print(f"Class weights: {class_weights}")
-    class_weights_tensor = torch.tensor(class_weights, dtype=torch.float).to(device)
-
-    criterion = nn.CrossEntropyLoss()# weight=class_weights_tensor)
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
@@ -124,17 +123,17 @@ def main():
         evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
 
         # Save the model
-        save_model(model, model_cfg.get('model_save_path'))
+        save_model(model, os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')))
 
     elif args.mode == 'evaluate':
-        model = load_model(model, model_cfg.get('model_save_path'))
+        model = load_model(model, os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')))
         evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
 
     elif args.mode == 'predict':
         if args.image_path is None:
             raise ValueError("Image path is required for prediction")
 
-        model = load_model(model, model_cfg.get('model_save_path'))
+        model = load_model(model, os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')))
         model.eval()
         with torch.no_grad():
             image = Image.open(args.image_path).convert('RGB')

@@ -2,6 +2,9 @@ import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report
+import os
+
+OUTPUT_DIR = 'output'
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, num_epochs, device, model_save_path, class_names):
     """
@@ -103,7 +106,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
     plt.legend()
     
     plt.tight_layout()
-    plt.savefig('training_curves.png')
+    plt.savefig(os.path.join(OUTPUT_DIR, 'training_curves.png'))
     plt.show()
     
     return model
@@ -133,7 +136,7 @@ def evaluate_model(model, test_loader, device, class_names):
     plt.ylabel('True')
     plt.title('Confusion Matrix')
     plt.tight_layout()
-    plt.savefig('confusion_matrix.png')
+    plt.savefig(os.path.join(OUTPUT_DIR, 'confusion_matrix.png'))
     plt.show()
     
     print(classification_report(all_labels, all_preds, target_names=class_names))
