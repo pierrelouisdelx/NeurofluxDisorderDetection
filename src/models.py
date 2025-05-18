@@ -4,10 +4,9 @@ from torchvision import models
 import torch
 import os
 
-def get_transfer_learning_model(model_name, num_classes, freeze_layers=True):
+def get_model(model_name, num_classes, freeze_layers=True):
     """
-    Loads a pre-trained model and replaces its classifier.
-    Supported models: 'resnet50'
+    Supported models: 'resnet50', 'efficientnet_b7', 'neuroflux_model'
     """
     if model_name == 'resnet50':
         model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
@@ -31,6 +30,22 @@ def get_transfer_learning_model(model_name, num_classes, freeze_layers=True):
             nn.Linear(512, num_classes)
         )
 
+    elif model_name == 'efficientnet_b7':
+        model = models.efficientnet_b7(weights=models.EfficientNet_B7_Weights.DEFAULT)
+
+        if freeze_layers:
+            for param in model.parameters():
+                param.requires_grad = False
+
+        in_features = model.classifier[3].in_features
+        model.classifier = nn.Sequential(
+            nn.Dropout(p=0.6),
+            nn.Linear(in_features, num_classes)
+        )
+
+    elif model_name == 'neuroflux_model':
+        model = NeurofluxModel(num_classes)
+                
     else:
         raise ValueError(f"Unsupported model: {model_name}, please check the model_name in the config file")
 
