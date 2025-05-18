@@ -8,6 +8,8 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
+from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 from utils.config_loader import load_config
 from utils.file_utils import get_images_and_labels
@@ -40,6 +42,11 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
+    # Setup TensorBoard
+    current_time = datetime.now().strftime('%Y%m%d-%H%M%S')
+    log_dir = os.path.join(OUTPUT_DIR, 'runs', current_time)
+    writer = SummaryWriter(log_dir=log_dir)
 
     dataset_cfg = load_config(args.dataset_config)
     model_cfg = load_config(args.model_config)
@@ -89,7 +96,7 @@ def main():
     val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
     test_dataset = NeurofluxDataset(test_image_paths, test_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
 
-    train_loader = DataLoader(train_dataset, batch_size=model_cfg.get('batch_size'), sampler=sampler)
+    train_loader = DataLoader(train_dataset, batch_size=model_cfg.get('batch_size'), shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=model_cfg.get('batch_size'), shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=model_cfg.get('batch_size'), shuffle=False)
 
@@ -116,8 +123,12 @@ def main():
             num_epochs=30,
             device=device,
             model_save_path='output/best_model.pth',
-            class_names=dataset_cfg.get('class_names')
+            class_names=dataset_cfg.get('class_names'),
+            writer=writer  # Pass the writer to train_model
         )
+
+        # Close TensorBoard writer
+        writer.close()
 
         # Evaluate on test set
         evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
