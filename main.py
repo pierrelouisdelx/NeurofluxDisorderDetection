@@ -35,6 +35,7 @@ def main():
     parser.add_argument('mode', choices=['preprocess', 'train', 'evaluate', 'predict', 'train_custom_model'], help="Mode to run: 'preprocess', 'train', 'evaluate', or 'predict'")
     parser.add_argument('--dataset_config', type=str, default='configs/dataset_config.json', help="Path to the dataset configuration JSON file")
     parser.add_argument('--model_config', type=str, default='configs/resnet50_config.json', help="Path to the model configuration JSON file")
+    parser.add_argument('--image_path', type=str, help="Path to the MRI scan image for prediction")
 
     args = parser.parse_args()
 
