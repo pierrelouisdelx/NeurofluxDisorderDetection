@@ -64,12 +64,6 @@ def balance_dataset_with_augmentation(
             # Calculate how many augmented samples we need
             samples_needed = target_samples_per_class - current_count
             
-            # Add original samples
-            for idx in class_indices:
-                augmented_paths.append(image_paths[idx])
-                augmented_labels.append(labels[idx])
-            
-            # Generate augmented samples
             for i in range(samples_needed):
                 # Randomly select an image from the current class
                 source_idx = random.choice(class_indices)
@@ -90,11 +84,6 @@ def balance_dataset_with_augmentation(
                 # Add to augmented dataset
                 augmented_paths.append(str(new_path))
                 augmented_labels.append(class_name)
-        else:
-            # If class already has enough samples, just add original samples
-            for idx in class_indices:
-                augmented_paths.append(image_paths[idx])
-                augmented_labels.append(labels[idx])
     
     return augmented_paths, augmented_labels
 
