@@ -17,8 +17,7 @@ ENV PATH="/root/.local/bin/:$PATH"
 COPY pyproject.toml uv.lock ./
 RUN uv sync
 
-COPY main.py ./
-COPY neuroflux_analyzer ./neuroflux_analyzer
+COPY src ./src
 COPY configs ./configs
 
-ENTRYPOINT ["uv", "run", "main.py"]
+ENTRYPOINT ["uv", "run", "src/main.py"]

@@ -9,14 +9,14 @@ import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
 
-from neuroflux_analyzer.utils.config_loader import load_config
-from neuroflux_analyzer.utils.file_utils import get_images_and_labels
-from neuroflux_analyzer.models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
-from neuroflux_analyzer.datasets import NeurofluxDataset
-from neuroflux_analyzer.utils.transforms import get_train_transforms, get_val_test_transforms
-from neuroflux_analyzer.training import train_model, evaluate_model
-from neuroflux_analyzer.utils.preprocessing import MRIPreprocessor
-from neuroflux_analyzer.utils.data_augmentation import process_and_balance_dataset
+from utils.config_loader import load_config
+from utils.file_utils import get_images_and_labels
+from models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
+from datasets import NeurofluxDataset
+from utils.transforms import get_train_transforms, get_val_test_transforms
+from training import train_model, evaluate_model
+from utils.preprocessing import MRIPreprocessor
+from utils.data_augmentation import process_and_balance_dataset
 
 OUTPUT_DIR = 'output'
 

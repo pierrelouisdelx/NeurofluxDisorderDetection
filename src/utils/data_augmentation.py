@@ -9,7 +9,7 @@ import random
 def balance_dataset_with_augmentation(
     image_paths,
     labels,
-    output_dir='new_aug',
+    output_dir='output/augmented_data',
     target_samples_per_class=None,
     seed=42
 ):
@@ -146,7 +146,7 @@ def merge_augmented_data(
 def process_and_balance_dataset(
     image_paths,
     labels,
-    output_dir='new_aug',
+    output_dir='output/augmented_data',
     target_samples_per_class=None,
 ):
     if os.path.exists(output_dir):
