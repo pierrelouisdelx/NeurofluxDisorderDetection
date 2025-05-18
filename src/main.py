@@ -34,7 +34,7 @@ def set_seed(seed_value):
 
 def main():
     parser = argparse.ArgumentParser(description="Neuroflux Disorder Phase Classifier")
-    parser.add_argument('mode', choices=['preprocess', 'train', 'evaluate', 'predict', 'train_custom_model'], help="Mode to run: 'preprocess', 'train', 'evaluate', or 'predict'")
+    parser.add_argument('mode', choices=['preprocess', 'train', 'evaluate', 'predict'], help="Mode to run: 'preprocess', 'train', 'evaluate', or 'predict'")
     parser.add_argument('--dataset_config', type=str, default='configs/dataset_config.json', help="Path to the dataset configuration JSON file")
     parser.add_argument('--model_config', type=str, default='configs/resnet50_config.json', help="Path to the model configuration JSON file")
     parser.add_argument('--image_path', type=str, help="Path to the MRI scan image for prediction")
@@ -81,16 +81,6 @@ def main():
         preprocessor.visualize_dataset_tsne(train_image_paths, train_labels)
         return
 
-    # Calculate class weights for balanced sampling
-    class_counts = train_labels_series.value_counts()
-    class_weights = 1. / class_counts
-    sample_weights = [class_weights[label] for label in train_labels]
-    sampler = WeightedRandomSampler(
-        weights=sample_weights,
-        num_samples=len(train_labels),
-        replacement=True
-    )
-
     # Load data
     train_dataset = NeurofluxDataset(train_image_paths, train_labels, transform=get_train_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
     val_dataset = NeurofluxDataset(val_image_paths, val_labels, transform=get_val_test_transforms(dataset_cfg.get('image_size')), class_names=dataset_cfg.get('class_names'))
@@ -104,14 +94,14 @@ def main():
     if args.mode == 'train_custom_model':
         model = NeurofluxModel(len(dataset_cfg.get('class_names')))
     else:
-        model = get_transfer_learning_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
+        model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'), weight_decay=model_cfg.get('weight_decay'))
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
-    if args.mode == 'train' or args.mode == 'train_custom_model':
+    if args.mode == 'train':
         # Train the model
         model = train_model(
             model=model,
