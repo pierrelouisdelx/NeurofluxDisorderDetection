@@ -12,7 +12,7 @@ from PIL import Image
 from utils.config_loader import load_config
 from utils.file_utils import get_images_and_labels
 from models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
-from datasets import NeurofluxDataset
+from dataset import NeurofluxDataset
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from training import train_model, evaluate_model
 from utils.preprocessing import MRIPreprocessor
@@ -101,7 +101,7 @@ def main():
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'), weight_decay=model_cfg.get('weight_decay'))
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
 
     if args.mode == 'train' or args.mode == 'train_custom_model':
