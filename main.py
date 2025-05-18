@@ -114,7 +114,7 @@ def main():
             scheduler=scheduler,
             num_epochs=30,
             device=device,
-            model_save_path='best_model.pth',
+            model_save_path='output/best_model.pth',
             class_names=dataset_cfg.get('class_names')
         )
 
