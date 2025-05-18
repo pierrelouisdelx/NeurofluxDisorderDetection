@@ -12,7 +12,7 @@ from PIL import Image
 from utils.config_loader import load_config
 from utils.file_utils import get_images_and_labels
 from models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
-from dataset import NeurofluxDataset
+from datasets import NeurofluxDataset
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from training import train_model, evaluate_model
 from utils.preprocessing import MRIPreprocessor
