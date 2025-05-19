@@ -16,7 +16,7 @@ from dataset import NeurofluxDataset
 from models.model_factory import ModelFactory
 from training import train_model, evaluate_model
 from utils.config_loader import ConfigLoader
-from utils.data_augmentation import process_and_balance_dataset
+from utils.data_augmenter import DataAugmenter
 from utils.file_utils import get_images_and_labels
 from utils.preprocessing import MRIPreprocessor
 from utils.transforms import get_train_transforms, get_val_test_transforms
@@ -86,7 +86,7 @@ def main():
         val_labels,
         test_image_paths,
         test_labels,
-    ) = process_and_balance_dataset(image_paths, labels)
+    ) = DataAugmenter().process_and_balance_dataset(image_paths, labels)
 
     print(f"Train set: {len(train_image_paths)} images")
     print(f"Validation set: {len(val_image_paths)} images")

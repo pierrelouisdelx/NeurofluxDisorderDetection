@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 
 from dataset import NeurofluxDataset
-from models import get_model
+from models.model_factory import ModelFactory
 from training import train_model, evaluate_model
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from utils.file_utils import get_images_and_labels
@@ -107,7 +107,7 @@ def objective(trial, model_name, train_loader, val_loader, test_loader, device, 
         }
 
     # Create model with trial hyperparameters
-    model = get_model(model_name, len(class_names), hyperparams=hyperparams)
+    model = ModelFactory(model_name, len(class_names), hyperparams=hyperparams).get_model()
     model.to(device)
 
     # Setup optimizer and criterion
