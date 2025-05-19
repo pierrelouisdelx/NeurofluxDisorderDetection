@@ -111,7 +111,7 @@ def main():
             device=device,
             model_save_path='output/best_model.pth',
             class_names=dataset_cfg.get('class_names'),
-            writer=writer  # Pass the writer to train_model
+            writer=writer
         )
 
         # Close TensorBoard writer

@@ -2,6 +2,7 @@ import torch.nn as nn
 from torchvision import models
 import torch
 import os
+from torch.nn import functional as F
 
 def get_model(model_name, num_classes, freeze_layers=True):
     """
@@ -61,43 +62,22 @@ def save_model(model, model_save_path):
 class NeurofluxModel(nn.Module):
     def __init__(self, num_classes):
         super(NeurofluxModel, self).__init__()
-        self.num_classes = num_classes
 
-        self.network = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-        )
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)  # -> [B, 16, 112, 112]
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)  # -> [B, 32, 56, 56]
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # -> [B, 64, 28, 28]
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=3, padding=1)  # -> [B, 128, 14, 14]
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.LazyLinear(128)
+        self.fc2 = nn.Linear(128, num_classes)
 
-        # You need to know the flattened size after the conv layers
-        # Let's assume input is (3, 128, 128) for example
-        # You can calculate this dynamically or hardcode for now
-        self.flattened_size = 256 * 16 * 16  # Example, adjust as needed
-
-        self.fc1 = nn.Linear(self.flattened_size, 1024)
-        self.relu1 = nn.ReLU()
-        self.fc2 = nn.Linear(1024, 512)
-        self.relu2 = nn.ReLU()
-        self.fc3 = nn.Linear(512, self.num_classes)
-
-    def forward(self, xb):
-        xb = self.network(xb)
-        xb = xb.view(xb.size(0), -1)
-        xb = self.fc1(xb)
-        xb = self.relu1(xb)
-        xb = self.fc2(xb)
-        xb = self.relu2(xb)
-        xb = self.fc3(xb)
-        return xb
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))  # [B, 16, 112, 112]
+        x = self.pool(F.relu(self.conv2(x)))  # [B, 32, 56, 56]
+        x = self.pool(F.relu(self.conv3(x)))  # [B, 64, 28, 28]
+        x = self.pool(F.relu(self.conv4(x)))  # [B, 128, 14, 14]
+        x = self.flatten(x)                   # [B, ?]
+        x = F.relu(self.fc1(x))               # [B, 128]
+        x = self.fc2(x)                       # [B, num_classes]
+        return x

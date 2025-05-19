@@ -62,7 +62,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             for images, labels in val_loader:
                 images = images.to(device)
                 labels = labels.to(device)
-                
+
                 outputs = model(images)
                 loss = criterion(outputs, labels)
                 
