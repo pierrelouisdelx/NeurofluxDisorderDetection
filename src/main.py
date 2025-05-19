@@ -12,7 +12,7 @@ from PIL import Image
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from datasets import NeurofluxDataset
+from dataset import NeurofluxDataset
 from models import get_model, load_model
 from training import train_model, evaluate_model
 from utils.config_loader import load_config
