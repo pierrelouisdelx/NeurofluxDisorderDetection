@@ -1,6 +1,6 @@
 {
     "data_dir": "data",
-    "image_size": [256, 256],
+    "image_size": [224, 224],
     "train_val_test_split": [0.7, 0.15, 0.15],
     "num_workers": 4,
     "random_seed": 42,
