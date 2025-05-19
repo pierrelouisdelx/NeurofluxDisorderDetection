@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 from dataset import NeurofluxDataset
 from models import get_model, load_model
 from training import train_model, evaluate_model
-from utils.config_loader import load_config
+from utils.config_loader import ConfigLoader
 from utils.data_augmentation import process_and_balance_dataset
 from utils.file_utils import get_images_and_labels
 from utils.preprocessing import MRIPreprocessor
@@ -67,8 +67,8 @@ def main():
     log_dir = os.path.join(OUTPUT_DIR, "runs", current_time)
     writer = SummaryWriter(log_dir=log_dir)
 
-    dataset_cfg = load_config(args.dataset_config)
-    model_cfg = load_config(args.model_config)
+    dataset_cfg = ConfigLoader(args.dataset_config)
+    model_cfg = ConfigLoader(args.model_config)
 
     print(model_cfg)
 
