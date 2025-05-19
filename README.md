@@ -28,11 +28,13 @@ This project implements two deep learning models to classify medical images into
 │   ├── hyperparameter_tuning.py  # Hyperparameter tuning using optuna
 │   ├── __init__.py       # Python package marker file
 │   ├── main.py           # Entry point of the application, handles CLI and orchestrates workflows
-│   ├── models.py         # Neural network architectures (ResNet50 and custom model)
+│   ├── models
+│   │   ├── model_factory.py  # Model factory for creating and loading models
+│   │   ├── neuroflux.py      # Custom model implementation
 │   ├── training.py       # Training loop implementation with validation and early stopping
 │   └── utils
 │       ├── config_loader.py      # JSON configuration file loader
-│       ├── data_augmentation.py  # Data augmentation and dataset balancing utilities
+│       ├── data_augmenter.py     # Data augmentation and dataset balancing utilities
 │       ├── file_utils.py         # File operations and data splitting utilities
 │       ├── __init__.py           # Python package marker file
 │       ├── preprocessing.py      # MRI image preprocessing and quality improvement
@@ -267,3 +269,5 @@ weighted avg       0.81      0.81      0.81       404
 The results for the ResNet50 model with hyperparameter tuning are as follows:
 
 ### Model 2: Custom CNN
+
+Training results of the custom CNN model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
