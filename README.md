@@ -24,8 +24,9 @@ This project implements two deep learning models to classify medical images into
 │   └── IPTE/              # Neuroflux disorder with intermediate polyglutamine tract expansion images
 ├── README.md
 ├── src
-│   ├── datasets.py        # PyTorch Dataset implementation for loading and preprocessing medical images
-│   ├── __init__.py        # Python package marker file
+│   ├── dataset.py        # PyTorch Dataset implementation for loading and preprocessing medical images
+│   ├── hyperparameter_tuning.py  # Hyperparameter tuning using optuna
+│   ├── __init__.py       # Python package marker file
 │   ├── main.py           # Entry point of the application, handles CLI and orchestrates workflows
 │   ├── models.py         # Neural network architectures (ResNet50 and custom model)
 │   ├── training.py       # Training loop implementation with validation and early stopping
@@ -105,19 +106,66 @@ docker build -t neuroflux-detection .
 docker run neuroflux-detection [train|evaluate|predict] --dataset_config [config_path] --model_config [model_config]
 ```
 
-## Models
+# Data Preparation
 
-### Model 1: Transfer Learning (Resnet50)
+## Initial Observations
 
--   Uses a pre-trained neural network architecture
--   Fine-tuned for the specific classification task
--   Implements transfer learning techniques
+The dataset provided was highly imbalanced and contained many low-quality images. The first step was to clean the dataset by removing these low-quality images.
 
-### Model 2: Custom Architecture
+## Data Augmentation
 
--   Implemented from scratch
--   Custom neural network architecture
--   Trained without pre-trained weights
+To address the imbalance in the dataset, a data augmentation script was developed. This script generates an equal number of images for each class using the following transformations:
+
+```python
+self.augmentation_transforms = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomAffine(degrees=(-15, 15), scale=(0.9, 1.1)),
+    ]
+)
+```
+
+## Model Development
+
+Model 1: Transfer Learning with ResNet50
+A pre-trained ResNet50 model was fine-tuned to classify the phases of Neuroflux disorder. This approach leverages transfer learning to improve the model's performance.
+
+Model 2: Custom CNN
+A custom Convolutional Neural Network (CNN) was designed and trained from scratch. The architecture of the custom model is as follows:
+
+```
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+NeurofluxModel                           [1, 5]                    --
+├─Conv2d: 1-1                            [1, 32, 224, 224]         896
+├─MaxPool2d: 1-2                         [1, 32, 112, 112]         --
+├─Conv2d: 1-3                            [1, 64, 112, 112]         18,496
+├─MaxPool2d: 1-4                         [1, 64, 56, 56]           --
+├─Conv2d: 1-5                            [1, 128, 56, 56]          73,856
+├─MaxPool2d: 1-6                         [1, 128, 28, 28]          --
+├─Conv2d: 1-7                            [1, 256, 28, 28]          295,168
+├─MaxPool2d: 1-8                         [1, 256, 14, 14]          --
+├─Flatten: 1-9                           [1, 50176]                --
+├─Linear: 1-10                           [1, 256]                  12,845,312
+├─Dropout: 1-11                          [1, 256]                  --
+├─Linear: 1-12                           [1, 5]                    1,285
+==========================================================================================
+Total params: 13,235,013
+Trainable params: 13,235,013
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 752.84
+==========================================================================================
+Input size (MB): 0.60
+Forward/backward pass size (MB): 24.09
+Params size (MB): 52.94
+Estimated Total Size (MB): 77.63
+==========================================================================================
+```
+
+## Hyperparameter Tuning
+
+Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard.
 
 ## Performance Metrics
 
@@ -128,3 +176,7 @@ The models are evaluated using multiple metrics:
 -   Recall
 -   F1-Score
 -   Confusion Matrix
+
+```
+
+```
