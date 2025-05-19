@@ -62,33 +62,24 @@ def save_model(model, model_save_path):
 class NeurofluxModel(nn.Module):
     def __init__(self, num_classes):
         super(NeurofluxModel, self).__init__()
-        self.model = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # 224 → 112
 
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # 112 → 56
-
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),  # 56 → 28
-
-            nn.Flatten(),
-            nn.Linear(262144, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 512),
-            nn.ReLU(),
-            nn.Linear(512, num_classes)
-        )
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)  # -> [B, 16, 112, 112]
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # -> [B, 32, 56, 56]
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)  # -> [B, 64, 28, 28]
+        self.conv4 = nn.Conv2d(128, 256, kernel_size=3, padding=1)  # -> [B, 128, 14, 14]
+        self.pool = nn.MaxPool2d(2, 2)
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.LazyLinear(256)
+        self.dropout = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(256, num_classes)
 
     def forward(self, x):
-        x = self.model(x)
-        return x
+        x = self.pool(F.relu(self.conv1(x)))  # [B, 16, 112, 112]
+        x = self.pool(F.relu(self.conv2(x)))  # [B, 32, 56, 56]
+        x = self.pool(F.relu(self.conv3(x)))  # [B, 64, 28, 28]
+        x = self.pool(F.relu(self.conv4(x)))  # [B, 128, 14, 14]
+        x = self.flatten(x)                                            # [B, ?]
+        x = F.relu(self.fc1(x))             # [B, 128]
+        x = self.dropout(x)
+        x = self.fc2(x)                                               # [B, num_classes]
+        return x           

@@ -127,7 +127,9 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), model_save_path)
+            os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+            model_save_path_with_acc = f"{model_save_path.rsplit('.', 1)[0]}_acc_{val_acc:.2f}.pth"
+            torch.save(model.state_dict(), model_save_path_with_acc)
             counter = 0
         else:
             counter += 1
