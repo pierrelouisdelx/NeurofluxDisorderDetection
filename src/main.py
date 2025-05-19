@@ -135,7 +135,7 @@ def main():
 
     # Load model
     model = ModelFactory(
-        model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
+        model_cfg.get("model_name"), len(dataset_cfg.get("class_names")), model_cfg.get("hyperparams")
     ).get_model()
     model.to(device)
 
@@ -148,7 +148,7 @@ def main():
         weight_decay=model_cfg.get("weight_decay"),
     )
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=0.5, patience=5
+        optimizer, mode="min", factor=model_cfg.get("lr_factor"), patience=model_cfg.get("lr_patience")
     )
 
     if args.mode == "train":

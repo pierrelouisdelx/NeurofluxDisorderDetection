@@ -106,7 +106,13 @@ Each model has its own configuration file located in the `configs` folder. The c
         "weight_decay": 1e-4,
         "num_epochs": 50,
         "model_save_path": "saved_models/resnet50_model.pth",
-        "batch_size": 64
+        "batch_size": 16,
+        "lr_factor": 0.5,
+        "lr_patience": 3,
+        "hyperparams": {
+            "hidden_size": 512,
+            "dropout_rate": 0.6
+        }
     }
     ```
 
@@ -119,7 +125,13 @@ Each model has its own configuration file located in the `configs` folder. The c
         "weight_decay": 1e-4,
         "num_epochs": 100,
         "model_save_path": "saved_models/neuroflux_model.pth",
-        "batch_size": 32
+        "batch_size": 16,
+        "lr_factor": 0.5,
+        "lr_patience": 5,
+        "hyperparams": {
+            "conv_channels": 64,
+            "dropout_rate": 0.5
+        }
     }
     ```
 
