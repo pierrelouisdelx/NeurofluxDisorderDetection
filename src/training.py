@@ -1,7 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, recall_score
 import os
 from torch.utils.tensorboard import SummaryWriter
 
@@ -26,6 +26,10 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         correct = 0
         total = 0
         
+        # Lists to store predictions and labels for recall calculation
+        train_preds = []
+        train_labels = []
+        
         for batch_idx, (images, labels) in enumerate(train_loader):
             images = images.to(device)
             labels = labels.to(device)
@@ -41,6 +45,10 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             
+            # Store predictions and labels for recall calculation
+            train_preds.extend(predicted.cpu().numpy())
+            train_labels.extend(labels.cpu().numpy())
+            
             # Log batch metrics
             if writer is not None and batch_idx % 5 == 0:
                 writer.add_scalar('Loss/train_batch', loss.item(), epoch * len(train_loader) + batch_idx)
@@ -50,6 +58,9 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         train_loss = running_loss / len(train_loader)
         train_acc = 100. * correct / total
         
+        # Calculate recall for training set
+        train_recall = recall_score(train_labels, train_preds, average=None)
+        
         train_losses.append(train_loss)
         train_accs.append(train_acc)
         
@@ -57,6 +68,10 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
         val_loss = 0.0
         val_correct = 0
         val_total = 0
+        
+        # Lists to store predictions and labels for recall calculation
+        val_preds = []
+        val_labels = []
         
         with torch.no_grad():
             for images, labels in val_loader:
@@ -70,9 +85,16 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
                 _, predicted = torch.max(outputs, 1)
                 val_total += labels.size(0)
                 val_correct += (predicted == labels).sum().item()
+                
+                # Store predictions and labels for recall calculation
+                val_preds.extend(predicted.cpu().numpy())
+                val_labels.extend(labels.cpu().numpy())
         
         val_loss = val_loss / len(val_loader)
         val_acc = 100. * val_correct / val_total
+        
+        # Calculate recall for validation set
+        val_recall = recall_score(val_labels, val_preds, average=None)
         
         val_losses.append(val_loss)
         val_accs.append(val_acc)
@@ -88,6 +110,15 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             writer.add_scalar('Loss/val', val_loss, epoch)
             writer.add_scalar('Accuracy/train', train_acc, epoch)
             writer.add_scalar('Accuracy/val', val_acc, epoch)
+            
+            # Log recall metrics for each class
+            for i, class_name in enumerate(class_names):
+                writer.add_scalar(f'Recall/train_{class_name}', train_recall[i], epoch)
+                writer.add_scalar(f'Recall/val_{class_name}', val_recall[i], epoch)
+            
+            # Log average recall
+            writer.add_scalar('Recall/train_avg', train_recall.mean(), epoch)
+            writer.add_scalar('Recall/val_avg', val_recall.mean(), epoch)
         
         print(f"Epoch {epoch+1}/{num_epochs}")
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
