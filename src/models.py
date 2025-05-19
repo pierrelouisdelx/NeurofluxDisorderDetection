@@ -69,10 +69,9 @@ class NeurofluxModel(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # -> [B, 64, 28, 28]
         self.conv4 = nn.Conv2d(64, 128, kernel_size=3, padding=1)  # -> [B, 128, 14, 14]
         self.flatten = nn.Flatten()
-        self.fc1 = nn.LazyLinear(256)
-        self.dropout = nn.Dropout(0.1)
-        self.bn1 = nn.BatchNorm1d(256)
-        self.fc2 = nn.Linear(256, num_classes)
+        self.fc1 = nn.LazyLinear(128)
+        self.dropout = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(128, num_classes)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))  # [B, 16, 112, 112]
@@ -80,6 +79,6 @@ class NeurofluxModel(nn.Module):
         x = self.pool(F.relu(self.conv3(x)))  # [B, 64, 28, 28]
         x = self.pool(F.relu(self.conv4(x)))  # [B, 128, 14, 14]
         x = self.flatten(x)                                            # [B, ?]
-        x = F.relu(self.bn1(self.fc1(x)))             # [B, 128]
+        x = F.relu(self.fc1(x))             # [B, 128]
         x = self.fc2(x)                                               # [B, num_classes]
         return x
