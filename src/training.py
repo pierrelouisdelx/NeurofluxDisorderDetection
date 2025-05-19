@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, classification_report, recall_score
 import os
-from torch.utils.tensorboard import SummaryWriter
 
 OUTPUT_DIR = 'output'
 

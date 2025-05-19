@@ -6,7 +6,7 @@ from torch.nn import functional as F
 
 def get_model(model_name, num_classes, freeze_layers=True):
     """
-    Supported models: 'resnet50', 'efficientnet_b7', 'neuroflux_model'
+    Supported models: 'resnet50', 'neuroflux'
     """
     if model_name == 'resnet50':
         model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
@@ -28,19 +28,6 @@ def get_model(model_name, num_classes, freeze_layers=True):
             nn.ReLU(),
             nn.Dropout(p=0.6),
             nn.Linear(512, num_classes)
-        )
-
-    elif model_name == 'efficientnet_b7':
-        model = models.efficientnet_b7(weights=models.EfficientNet_B7_Weights.DEFAULT)
-
-        if freeze_layers:
-            for param in model.parameters():
-                param.requires_grad = False
-
-        in_features = model.classifier[3].in_features
-        model.classifier = nn.Sequential(
-            nn.Dropout(p=0.6),
-            nn.Linear(in_features, num_classes)
         )
 
     elif model_name == 'neuroflux':
@@ -78,8 +65,8 @@ class NeurofluxModel(nn.Module):
         x = self.pool(F.relu(self.conv2(x)))  # [B, 32, 56, 56]
         x = self.pool(F.relu(self.conv3(x)))  # [B, 64, 28, 28]
         x = self.pool(F.relu(self.conv4(x)))  # [B, 128, 14, 14]
-        x = self.flatten(x)                                            # [B, ?]
-        x = F.relu(self.fc1(x))             # [B, 128]
+        x = self.flatten(x)                   # [B, ?]
+        x = F.relu(self.fc1(x))               # [B, 128]
         x = self.dropout(x)
-        x = self.fc2(x)                                               # [B, num_classes]
+        x = self.fc2(x)                       # [B, num_classes]
         return x           
