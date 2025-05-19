@@ -96,7 +96,7 @@ def main():
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'), weight_decay=model_cfg.get('weight_decay'))
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
 
     if args.mode == 'train':
         # Train the model
@@ -109,7 +109,7 @@ def main():
             scheduler=scheduler,
             num_epochs=model_cfg.get('num_epochs'),
             device=device,
-            model_save_path='output/best_model.pth',
+            model_save_path=os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')),
             class_names=dataset_cfg.get('class_names'),
             writer=writer
         )
@@ -119,9 +119,6 @@ def main():
 
         # Evaluate on test set
         evaluate_model(model, test_loader, device, dataset_cfg.get('class_names'))
-
-        # Save the model
-        save_model(model, os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')))
 
     elif args.mode == 'evaluate':
         model = load_model(model, os.path.join(OUTPUT_DIR, model_cfg.get('model_save_path')))
