@@ -13,7 +13,7 @@ from training import train_model, evaluate_model
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from utils.file_utils import get_images_and_labels
 from utils.data_augmenter import DataAugmenter
-from utils.config_loader import load_config
+from utils.config_loader import ConfigLoader
 
 
 def get_optimizer(trial, model_parameters):
@@ -184,7 +184,7 @@ def optimize_hyperparameters(
     os.makedirs(output_dir, exist_ok=True)
 
     # Load dataset configuration
-    dataset_cfg = load_config(dataset_config_path)
+    dataset_cfg = ConfigLoader(dataset_config_path).config
 
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
