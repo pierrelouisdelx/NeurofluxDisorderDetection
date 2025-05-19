@@ -4,7 +4,7 @@ import torch
 import random
 import numpy as np
 import pandas as pd
-from torch.utils.data import DataLoader, WeightedRandomSampler
+from torch.utils.data import DataLoader 
 import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
@@ -107,7 +107,7 @@ def main():
             criterion=criterion,
             optimizer=optimizer,
             scheduler=scheduler,
-            num_epochs=30,
+            num_epochs=model_cfg.get('num_epochs'),
             device=device,
             model_save_path='output/best_model.pth',
             class_names=dataset_cfg.get('class_names'),
