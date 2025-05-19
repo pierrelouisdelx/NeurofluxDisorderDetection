@@ -1,5 +1,6 @@
-from torch.utils.data import Dataset
 from PIL import Image
+from torch.utils.data import Dataset
+
 
 class NeurofluxDataset(Dataset):
     def __init__(self, image_paths, labels, transform=None, class_names=None):
@@ -28,5 +29,5 @@ class NeurofluxDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
-        
+
         return image, label
