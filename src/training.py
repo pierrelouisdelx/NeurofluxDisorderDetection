@@ -189,10 +189,7 @@ def train_model(
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
-            model_save_path_with_acc = (
-                f"{model_save_path.rsplit('.', 1)[0]}_acc_{val_acc:.2f}.pth"
-            )
-            torch.save(model.state_dict(), model_save_path_with_acc)
+            torch.save(model.state_dict(), model_save_path)
             counter = 0
         else:
             counter += 1
