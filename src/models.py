@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.nn.functional as F
 from torchvision import models
 import torch
 import os
@@ -43,7 +42,7 @@ def get_model(model_name, num_classes, freeze_layers=True):
             nn.Linear(in_features, num_classes)
         )
 
-    elif model_name == 'neuroflux_model':
+    elif model_name == 'neuroflux':
         model = NeurofluxModel(num_classes)
                 
     else:
@@ -62,6 +61,43 @@ def save_model(model, model_save_path):
 class NeurofluxModel(nn.Module):
     def __init__(self, num_classes):
         super(NeurofluxModel, self).__init__()
+        self.num_classes = num_classes
 
-    def forward(self, x):
-        return self.model(x)
+        self.network = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2, 2),
+        )
+
+        # You need to know the flattened size after the conv layers
+        # Let's assume input is (3, 128, 128) for example
+        # You can calculate this dynamically or hardcode for now
+        self.flattened_size = 256 * 16 * 16  # Example, adjust as needed
+
+        self.fc1 = nn.Linear(self.flattened_size, 1024)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(1024, 512)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(512, self.num_classes)
+
+    def forward(self, xb):
+        xb = self.network(xb)
+        xb = xb.view(xb.size(0), -1)
+        xb = self.fc1(xb)
+        xb = self.relu1(xb)
+        xb = self.fc2(xb)
+        xb = self.relu2(xb)
+        xb = self.fc3(xb)
+        return xb

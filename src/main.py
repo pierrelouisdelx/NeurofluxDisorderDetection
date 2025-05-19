@@ -13,7 +13,7 @@ from datetime import datetime
 
 from utils.config_loader import load_config
 from utils.file_utils import get_images_and_labels
-from models import get_transfer_learning_model, load_model, save_model, NeurofluxModel
+from models import get_model, load_model, save_model 
 from datasets import NeurofluxDataset
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from training import train_model, evaluate_model
@@ -91,10 +91,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=model_cfg.get('batch_size'), shuffle=False)
 
     # Load model
-    if args.mode == 'train_custom_model':
-        model = NeurofluxModel(len(dataset_cfg.get('class_names')))
-    else:
-        model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
+    model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()

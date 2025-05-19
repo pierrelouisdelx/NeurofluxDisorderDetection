@@ -20,11 +20,6 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
     train_accs = []
     val_accs = []
     
-    # Log model graph
-    if writer is not None:
-        dummy_input = torch.randn(1, 3, 224, 224).to(device)
-        writer.add_graph(model, dummy_input)
-    
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
