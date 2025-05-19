@@ -51,6 +51,8 @@ def main():
     dataset_cfg = load_config(args.dataset_config)
     model_cfg = load_config(args.model_config)
 
+    print(model_cfg)
+
     set_seed(dataset_cfg.get('random_seed', 42)) # Set seed for reproducibility
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -93,6 +95,8 @@ def main():
     # Load model
     model = get_model(model_cfg.get('model_name'), len(dataset_cfg.get('class_names')))
     model.to(device)
+
+    print(model)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=model_cfg.get('learning_rate'), weight_decay=model_cfg.get('weight_decay'))
