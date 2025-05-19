@@ -12,7 +12,7 @@ from models.model_factory import ModelFactory
 from training import train_model, evaluate_model
 from utils.transforms import get_train_transforms, get_val_test_transforms
 from utils.file_utils import get_images_and_labels
-from utils.data_augmentation import process_and_balance_dataset
+from utils.data_augmenter import DataAugmenter
 from utils.config_loader import load_config
 
 def get_optimizer(trial, model_parameters):
@@ -169,7 +169,7 @@ def optimize_hyperparameters(model_name, dataset_config_path, output_dir="output
     
     # Load and preprocess data
     image_paths, labels = get_images_and_labels(dataset_cfg.get("data_dir"))
-    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = process_and_balance_dataset(
+    train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels = DataAugmenter().process_and_balance_dataset(
         image_paths, labels
     )
     
