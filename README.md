@@ -1,6 +1,6 @@
 # Neuroflux Disorder Detection
 
-A deep learning project for classifying different phases of Neuroflux disorder from medical images.
+A deep learning project for classifying different phases of Neuroflux disorder from medical images. The disease is an imaginary disease that has been created for this project.
 
 ## Overview
 
@@ -48,6 +48,7 @@ This project implements two deep learning models to classify medical images into
 -   PyTorch
 -   CUDA (for GPU acceleration)
 -   Docker (for containerization)
+-   Nvidia Container Toolkit (for GPU acceleration in Docker)
 
 ## Installation
 
@@ -68,12 +69,62 @@ uv sync
 
 ## Usage
 
+The main entry point of the application is located in `src/main.py` and handles different modes of operation for the Neuroflux Disorder Phase Classifier.
+
+Modes:
+
+-   `preprocess`: Analyze and preprocess the dataset
+-   `train`: Train the model
+-   `evaluate`: Evaluate the model on test data
+-   `predict`: Make predictions on a single image
+
 ### Training Models
+
+The dataset configuration file is located in the `configs` folder. It has a very simple structure:
+
+```json
+{
+    "data_dir": "data", # Path to the dataset
+    "image_size": [224, 224], # Size of the images
+    "train_val_test_split": [0.7, 0.15, 0.15], # Split of the dataset into train, validation and test
+    "num_workers": 4, # Number of workers for the dataloader
+    "random_seed": 42, # Random seed for the dataset
+    "class_names": ["PTE", "LO", "EO", "IPTE", "IO"] # Names of the classes
+}
+```
+
+Each model has its own configuration file located in the `configs` folder. The configuration files are named as follows:
+
+-   `resnet50_config.json`: Configuration for the ResNet50 model
+
+    ```json
+    {
+        "model_name": "resnet50",
+        "learning_rate": 1e-3,
+        "weight_decay": 1e-4,
+        "num_epochs": 50,
+        "model_save_path": "saved_models/resnet50_model.pth",
+        "batch_size": 64
+    }
+    ```
+
+-   `neuroflux_config.json`: Configuration for the custom model
+
+    ```json
+    {
+        "model_name": "neuroflux",
+        "learning_rate": 1e-3,
+        "weight_decay": 1e-4,
+        "num_epochs": 100,
+        "model_save_path": "saved_models/neuroflux_model.pth",
+        "batch_size": 32
+    }
+    ```
 
 To train the model
 
 ```bash
-uv run src/main.py train --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
+uv run src/main.py train --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ### Evaluation
@@ -81,7 +132,7 @@ uv run src/main.py train --dataset_config configs/dataset_config.json --model_co
 To evaluate the model performances:
 
 ```bash
-python src/main.py --mode evaluate --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
+python src/main.py --mode evaluate --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ### Prediction
@@ -89,10 +140,12 @@ python src/main.py --mode evaluate --dataset_config configs/dataset_config.json 
 To predict the phase of a new MRI scan:
 
 ```bash
-python src/main.py --mode predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
+python src/main.py --mode predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ## Docker Usage
+
+In order to be able to use the models with Docker, nvidia-container-toolkit is required. Please refer to the [installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) for more information.
 
 ### Building the Docker Image
 
@@ -103,7 +156,7 @@ docker build -t neuroflux-detection .
 ### Running with Docker
 
 ```bash
-docker run neuroflux-detection [train|evaluate|predict] --dataset_config [config_path] --model_config [model_config]
+docker run neuroflux-detection [train|evaluate|predict] --dataset_config configs/dataset_config.json --model_config <model_config>
 ```
 
 # Data Preparation
@@ -165,7 +218,7 @@ Estimated Total Size (MB): 77.63
 
 ## Hyperparameter Tuning
 
-Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard.
+Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle and google colab.
 
 ## Performance Metrics
 
@@ -177,6 +230,8 @@ The models are evaluated using multiple metrics:
 -   F1-Score
 -   Confusion Matrix
 
-```
+## Results
 
-```
+### Model 1: Transfer Learning with ResNet50
+
+### Model 2: Custom CNN
