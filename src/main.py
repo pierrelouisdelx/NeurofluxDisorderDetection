@@ -174,7 +174,7 @@ def main():
     elif args.mode == "evaluate":
         model = ModelFactory(
             model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
-        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")))
+        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")), model)
         evaluate_model(model, test_loader, device, dataset_cfg.get("class_names"))
 
     elif args.mode == "predict":
@@ -183,7 +183,7 @@ def main():
 
         model = ModelFactory(
             model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
-        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")))
+        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")), model)
         model.eval()
         with torch.no_grad():
             image = Image.open(args.image_path).convert("RGB")

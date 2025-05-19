@@ -57,9 +57,11 @@ class ModelFactory:
 
         return model
 
-    def load_model(self, model_save_path):
-        self.model.load_state_dict(torch.load(model_save_path))
-        return self.model
+    def load_model(self, model_save_path, model=None):
+        if model is None:
+            model = self.get_model()
+        model.load_state_dict(torch.load(model_save_path))
+        return model
 
     def save_model(model, model_save_path):
         os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
