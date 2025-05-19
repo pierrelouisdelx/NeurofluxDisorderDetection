@@ -69,44 +69,26 @@ uv sync
 
 ### Training Models
 
-To train the transfer learning model (resnet50)
+To train the model
 
 ```bash
 uv run src/main.py train --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
 ```
 
-To train the self made model
-
-```bash
-uv run src/main.py train_custom_model --dataset_config configs/dataset_config.json --model_config configs/neuroflux_config.json
-```
-
 ### Evaluation
 
-To evaluate the transfer learning model performance:
+To evaluate the model performances:
 
 ```bash
 python src/main.py --mode evaluate --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
 ```
 
-To evaluate the self made model performance:
-
-```bash
-python src/main.py --mode evaluate --dataset_config configs/dataset_config.json --model_config configs/neuroflux_config.json
-```
-
 ### Prediction
 
-To predict the phase of a new MRI scan from the transfer learning model:
+To predict the phase of a new MRI scan:
 
 ```bash
 python src/main.py --mode predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/resnet50_config.json
-```
-
-To predict the phase of a new MRI scan from the self made model:
-
-```bash
-python src/main.py --mode predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/neuroflux_config.json
 ```
 
 ## Docker Usage
