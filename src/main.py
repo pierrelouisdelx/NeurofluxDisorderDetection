@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import NeurofluxDataset
-from models import get_model, load_model
+from models.model_factory import ModelFactory
 from training import train_model, evaluate_model
 from utils.config_loader import ConfigLoader
 from utils.data_augmentation import process_and_balance_dataset
@@ -67,8 +67,8 @@ def main():
     log_dir = os.path.join(OUTPUT_DIR, "runs", current_time)
     writer = SummaryWriter(log_dir=log_dir)
 
-    dataset_cfg = ConfigLoader(args.dataset_config)
-    model_cfg = ConfigLoader(args.model_config)
+    dataset_cfg = ConfigLoader(args.dataset_config).config
+    model_cfg = ConfigLoader(args.model_config).config
 
     print(model_cfg)
 
@@ -140,7 +140,7 @@ def main():
     )
 
     # Load model
-    model = get_model(model_cfg.get("model_name"), len(dataset_cfg.get("class_names")))
+    model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).model
     model.to(device)
 
     print(model)
