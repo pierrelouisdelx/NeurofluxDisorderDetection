@@ -135,7 +135,7 @@ def train_model(
         val_precisions.append(val_precision)
 
         if scheduler:
-            scheduler.step(val_loss)
+            scheduler.step()
             if writer is not None:
                 writer.add_scalar(
                     "Learning_rate", optimizer.param_groups[0]["lr"], epoch
