@@ -127,6 +127,14 @@ To train the model
 uv run src/main.py train --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
+#### Training Progress
+
+The training progress is logged in the `output/runs` directory. To monitor the training progress, the tensorboard command can be used:
+
+```bash
+tensorboard --logdir=output/runs
+```
+
 ### Evaluation
 
 To evaluate the model performances:
