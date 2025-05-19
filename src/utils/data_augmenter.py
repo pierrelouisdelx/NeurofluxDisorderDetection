@@ -19,12 +19,14 @@ class DataAugmenter:
         self.seed = seed
         random.seed(seed)
         torch.manual_seed(seed)
-        
+
         # Define augmentation transforms
-        self.augmentation_transforms = transforms.Compose([
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomAffine(degrees=(-15, 15), scale=(0.9, 1.1)),
-        ])
+        self.augmentation_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomAffine(degrees=(-15, 15), scale=(0.9, 1.1)),
+            ]
+        )
 
     def balance_dataset(
         self,
@@ -158,7 +160,9 @@ class DataAugmenter:
             tuple: (train_image_paths, train_labels, val_image_paths, val_labels, test_image_paths, test_labels)
         """
         if os.path.exists(output_dir):
-            print(f"Output directory {output_dir} already exists. Loading existing augmented data...")
+            print(
+                f"Output directory {output_dir} already exists. Loading existing augmented data..."
+            )
             # Load existing augmented data
             augmented_paths = []
             augmented_labels = []

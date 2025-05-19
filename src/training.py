@@ -3,7 +3,15 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
-from sklearn.metrics import confusion_matrix, classification_report, recall_score, roc_curve, auc, f1_score, precision_score
+from sklearn.metrics import (
+    confusion_matrix,
+    classification_report,
+    recall_score,
+    roc_curve,
+    auc,
+    f1_score,
+    precision_score,
+)
 from sklearn.preprocessing import label_binarize
 import numpy as np
 
@@ -88,7 +96,9 @@ def train_model(
         # Calculate metrics for training set
         train_recall = recall_score(train_labels, train_preds, average=None)
         train_f1 = f1_score(train_labels, train_preds, average=None)
-        train_precision = precision_score(train_labels, train_preds, average=None, zero_division=0)
+        train_precision = precision_score(
+            train_labels, train_preds, average=None, zero_division=0
+        )
 
         train_losses.append(train_loss)
         train_accs.append(train_acc)
@@ -127,7 +137,9 @@ def train_model(
         # Calculate metrics for validation set
         val_recall = recall_score(val_labels, val_preds, average=None)
         val_f1 = f1_score(val_labels, val_preds, average=None)
-        val_precision = precision_score(val_labels, val_preds, average=None, zero_division=0)
+        val_precision = precision_score(
+            val_labels, val_preds, average=None, zero_division=0
+        )
 
         val_losses.append(val_loss)
         val_accs.append(val_acc)
@@ -154,8 +166,12 @@ def train_model(
                 writer.add_scalar(f"Recall/val_{class_name}", val_recall[i], epoch)
                 writer.add_scalar(f"F1/train_{class_name}", train_f1[i], epoch)
                 writer.add_scalar(f"F1/val_{class_name}", val_f1[i], epoch)
-                writer.add_scalar(f"Precision/train_{class_name}", train_precision[i], epoch)
-                writer.add_scalar(f"Precision/val_{class_name}", val_precision[i], epoch)
+                writer.add_scalar(
+                    f"Precision/train_{class_name}", train_precision[i], epoch
+                )
+                writer.add_scalar(
+                    f"Precision/val_{class_name}", val_precision[i], epoch
+                )
 
             # Log average metrics
             writer.add_scalar("Recall/train_avg", train_recall.mean(), epoch)
@@ -266,7 +282,7 @@ def evaluate_model(model, test_loader, device, class_names):
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
-    
+
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], all_probs[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
@@ -274,17 +290,22 @@ def evaluate_model(model, test_loader, device, class_names):
     # Plot ROC curves
     plt.figure(figsize=(10, 8))
     colors = plt.cm.rainbow(np.linspace(0, 1, n_classes))
-    
-    for i, color in zip(range(n_classes), colors):
-        plt.plot(fpr[i], tpr[i], color=color, lw=2,
-                label=f'ROC curve of {class_names[i]} (AUC = {roc_auc[i]:.2f})')
 
-    plt.plot([0, 1], [0, 1], 'k--', lw=2)
+    for i, color in zip(range(n_classes), colors):
+        plt.plot(
+            fpr[i],
+            tpr[i],
+            color=color,
+            lw=2,
+            label=f"ROC curve of {class_names[i]} (AUC = {roc_auc[i]:.2f})",
+        )
+
+    plt.plot([0, 1], [0, 1], "k--", lw=2)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic (ROC) Curves')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Receiver Operating Characteristic (ROC) Curves")
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, "roc_curves.png"))

@@ -134,7 +134,9 @@ def main():
     )
 
     # Load model
-    model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).get_model()
+    model = ModelFactory(
+        model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
+    ).get_model()
     model.to(device)
 
     print(model)
@@ -170,18 +172,18 @@ def main():
         evaluate_model(model, test_loader, device, dataset_cfg.get("class_names"))
 
     elif args.mode == "evaluate":
-        model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).load_model(
-            os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
-        )
+        model = ModelFactory(
+            model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
+        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")))
         evaluate_model(model, test_loader, device, dataset_cfg.get("class_names"))
 
     elif args.mode == "predict":
         if args.image_path is None:
             raise ValueError("Image path is required for prediction")
 
-        model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).load_model(
-            os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
-        )
+        model = ModelFactory(
+            model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))
+        ).load_model(os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path")))
         model.eval()
         with torch.no_grad():
             image = Image.open(args.image_path).convert("RGB")

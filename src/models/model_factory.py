@@ -6,6 +6,7 @@ from torchvision import models
 
 from models.neuroflux import NeurofluxModel
 
+
 class ModelFactory:
     def __init__(self, model_name, num_classes, freeze_layers=True, hyperparams=None):
         self.model_name = model_name
@@ -31,9 +32,13 @@ class ModelFactory:
 
             # Replace the final layer with proper weight initialization
             in_features = model.fc.in_features
-            hidden_size = self.hyperparams.get("hidden_size", 512) if self.hyperparams else 512
-            dropout_rate = self.hyperparams.get("dropout_rate", 0.6) if self.hyperparams else 0.6
-            
+            hidden_size = (
+                self.hyperparams.get("hidden_size", 512) if self.hyperparams else 512
+            )
+            dropout_rate = (
+                self.hyperparams.get("dropout_rate", 0.6) if self.hyperparams else 0.6
+            )
+
             model.fc = nn.Sequential(
                 nn.Linear(in_features, hidden_size),
                 nn.BatchNorm1d(hidden_size),
@@ -52,11 +57,9 @@ class ModelFactory:
 
         return model
 
-
     def load_model(self, model_save_path):
         self.model.load_state_dict(torch.load(model_save_path))
         return self.model
-
 
     def save_model(model, model_save_path):
         os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
