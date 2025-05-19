@@ -1,7 +1,7 @@
 {
     "model_name": "neuroflux",
     "image_size": [224, 224],
-    "learning_rate": 0.001,
+    "learning_rate": 1e-3,
     "weight_decay": 1e-4,
     "num_epochs": 100,
     "model_save_path": "saved_models/neuroflux_model.pth",
