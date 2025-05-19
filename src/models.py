@@ -6,7 +6,7 @@ from torch.nn import functional as F
 from torchvision import models
 
 
-def get_model(model_name, num_classes, freeze_layers=True):
+def get_model(model_name, num_classes, freeze_layers=True, hyperparams=None):
     """
     Supported models: 'resnet50', 'neuroflux'
     """
@@ -24,16 +24,19 @@ def get_model(model_name, num_classes, freeze_layers=True):
 
         # Replace the final layer with proper weight initialization
         in_features = model.fc.in_features
+        hidden_size = hyperparams.get("hidden_size", 512) if hyperparams else 512
+        dropout_rate = hyperparams.get("dropout_rate", 0.6) if hyperparams else 0.6
+        
         model.fc = nn.Sequential(
-            nn.Linear(in_features, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(in_features, hidden_size),
+            nn.BatchNorm1d(hidden_size),
             nn.ReLU(),
-            nn.Dropout(p=0.6),
-            nn.Linear(512, num_classes),
+            nn.Dropout(p=dropout_rate),
+            nn.Linear(hidden_size, num_classes),
         )
 
     elif model_name == "neuroflux":
-        model = NeurofluxModel(num_classes)
+        model = NeurofluxModel(num_classes, hyperparams)
 
     else:
         raise ValueError(
@@ -54,19 +57,20 @@ def save_model(model, model_save_path):
 
 
 class NeurofluxModel(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, hyperparams=None):
         super(NeurofluxModel, self).__init__()
+        
+        conv_channels = hyperparams.get("conv_channels", 32) if hyperparams else 32
+        dropout_rate = hyperparams.get("dropout_rate", 0.5) if hyperparams else 0.5
 
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)  # -> [B, 16, 112, 112]
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)  # -> [B, 32, 56, 56]
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)  # -> [B, 64, 28, 28]
-        self.conv4 = nn.Conv2d(
-            128, 256, kernel_size=3, padding=1
-        )  # -> [B, 128, 14, 14]
+        self.conv1 = nn.Conv2d(3, conv_channels, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(conv_channels, conv_channels*2, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(conv_channels*2, conv_channels*4, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(conv_channels*4, conv_channels*8, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.flatten = nn.Flatten()
         self.fc1 = nn.LazyLinear(256)
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(dropout_rate)
         self.fc2 = nn.Linear(256, num_classes)
 
     def forward(self, x):
