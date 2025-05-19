@@ -12,7 +12,6 @@ class ModelFactory:
         self.num_classes = num_classes
         self.freeze_layers = freeze_layers
         self.hyperparams = hyperparams
-        self.model = self.get_model()
 
     def get_model(self):
         """

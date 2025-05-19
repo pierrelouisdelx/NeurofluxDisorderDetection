@@ -98,14 +98,8 @@ def main():
 
     if args.mode == "preprocess":
         preprocessor = MRIPreprocessor()
-
-        # Analyze dataset
         preprocessor.analyze_dataset(train_image_paths)
-
-        # Detect outliers
         preprocessor.detect_outliers(train_image_paths, train_labels)
-
-        # Visualize dataset
         preprocessor.visualize_dataset_tsne(train_image_paths, train_labels)
         return
 
@@ -140,7 +134,7 @@ def main():
     )
 
     # Load model
-    model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).model
+    model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).get_model()
     model.to(device)
 
     print(model)
@@ -156,7 +150,6 @@ def main():
     )
 
     if args.mode == "train":
-        # Train the model
         model = train_model(
             model=model,
             train_loader=train_loader,
@@ -171,15 +164,14 @@ def main():
             writer=writer,
         )
 
-        # Close TensorBoard writer
         writer.close()
 
         # Evaluate on test set
         evaluate_model(model, test_loader, device, dataset_cfg.get("class_names"))
 
     elif args.mode == "evaluate":
-        model = load_model(
-            model, os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
+        model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).load_model(
+            os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
         )
         evaluate_model(model, test_loader, device, dataset_cfg.get("class_names"))
 
@@ -187,8 +179,8 @@ def main():
         if args.image_path is None:
             raise ValueError("Image path is required for prediction")
 
-        model = load_model(
-            model, os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
+        model = ModelFactory(model_cfg.get("model_name"), len(dataset_cfg.get("class_names"))).load_model(
+            os.path.join(OUTPUT_DIR, model_cfg.get("model_save_path"))
         )
         model.eval()
         with torch.no_grad():
