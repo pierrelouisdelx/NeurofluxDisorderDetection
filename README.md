@@ -140,7 +140,7 @@ tensorboard --logdir=output/runs
 To evaluate the model performances:
 
 ```bash
-python src/main.py --mode evaluate --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
+python src/main.py evaluate --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ### Prediction
@@ -148,7 +148,7 @@ python src/main.py --mode evaluate --dataset_config configs/dataset_config.json 
 To predict the phase of a new MRI scan:
 
 ```bash
-python src/main.py --mode predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
+python src/main.py predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ## Docker Usage
@@ -228,6 +228,8 @@ Estimated Total Size (MB): 77.63
 
 Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle and google colab.
 
+After having trained the models, the best hyperparameters were found to be:
+
 ## Performance Metrics
 
 The models are evaluated using multiple metrics:
@@ -241,5 +243,27 @@ The models are evaluated using multiple metrics:
 ## Results
 
 ### Model 1: Transfer Learning with ResNet50
+
+Training results of the transfer learning using the ResNet50 model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
+
+```
+              precision    recall  f1-score   support
+
+         PTE       0.69      0.70      0.69        86
+          LO       0.79      0.83      0.81        98
+          EO       0.74      0.73      0.73        77
+        IPTE       0.95      0.81      0.87        67
+          IO       0.91      0.99      0.95        76
+
+    accuracy                           0.81       404
+   macro avg       0.82      0.81      0.81       404
+weighted avg       0.81      0.81      0.81       404
+```
+
+![ResNet50 confusion matrix](./images/resnet50/confusion_matrix_no_optuna.png)
+![ResNet50 roc curves](./images/resnet50/roc_curves_no_optuna.png)
+![ResNet50 training curves](./images/resnet50/training_curves_no_optuna.png)
+
+The results for the ResNet50 model with hyperparameter tuning are as follows:
 
 ### Model 2: Custom CNN
