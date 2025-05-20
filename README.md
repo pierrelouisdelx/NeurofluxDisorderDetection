@@ -187,6 +187,23 @@ docker run neuroflux-detection [train|evaluate|predict] --dataset_config configs
 
 The dataset provided was highly imbalanced and contained many low-quality images. The first step was to clean the dataset by removing these low-quality images.
 
+## Preprocessing
+
+The preprocessing step consisted of the following:
+
+-   Resizing the images to 224x224
+-   Converting the images to grayscale
+-   Normalizing the pixel values
+
+I also created the MRIPreprocessor class in `src/utils/preprocessing.py`. This class contains the following methods:
+
+-   `analyze_dataset`: Computes statistics such as intensity, contrast, signal-to-noise ratio (SNR), and entropy for each image in the dataset. These statistics are stored and used for further analysis.
+-   `detect_outliers`: Identifies outlier images using statistical methods. It calculates z-scores for each image based on the computed statistics and flags images with z-scores above a specified threshold as outliers.
+-   `visualize_dataset_tsne`: Visualizes the dataset using t-SNE to identify clusters and potential problems. It also applies DBSCAN clustering to find clusters within the t-SNE results.
+-   `preprocess_image`: Applies various preprocessing methods to an image, such as normalization, contrast enhancement (CLAHE), denoising, and histogram equalization.
+
+The main purpose of the MRIPreprocessor class is to analyze the dataset and detect outliers in order to remove them from the dataset.
+
 ## Data Augmentation
 
 To address the imbalance in the dataset, a data augmentation script was developed. This script generates an equal number of images for each class using the following transformations:
@@ -200,12 +217,32 @@ self.augmentation_transforms = transforms.Compose(
 )
 ```
 
+Once the augmented data was created, the augmented dataset is merged with the original dataset and the outliers are removed from the dataset. All of this happens in the `src/utils/data_augmenter.py` file.
+
 ## Model Development
 
-Model 1: Transfer Learning with ResNet50
-A pre-trained ResNet50 model was fine-tuned to classify the phases of Neuroflux disorder. This approach leverages transfer learning to improve the model's performance.
+### Model 1: Transfer Learning with ResNet50
 
-Model 2: Custom CNN
+A pre-trained ResNet50 model was fine-tuned to classify the phases of Neuroflux disorder. This approach leverages transfer learning to improve the model's performance. The following modifications were made to the ResNet50 architecture:
+
+1. Layer Freezing: Most of the pre-trained layers were frozen to preserve the learned features. Specifically, all layers before layer4 (the last block) were frozen to prevent overfitting and maintain the model's ability to extract general features.
+
+2. Custom Classification Head: The original fully connected layer was replaced with a more sophisticated classification head:
+    - A linear layer reducing the features to a hidden size (default: 512)
+    - Batch normalization for better training stability
+    - ReLU activation
+    - Dropout layer (default rate: 0.6) for regularization
+    - Final linear layer mapping to the 5 output classes
+
+This architecture modification allows the model to:
+
+-   Leverage pre-trained weights for feature extraction
+-   Fine-tune only the most relevant layers for the specific task
+-   Prevent overfitting through dropout and batch normalization
+-   Adapt the output to the specific 5-class classification problem
+
+### Model 2: Custom CNN
+
 A custom Convolutional Neural Network (CNN) was designed and trained from scratch. The architecture of the custom model is as follows:
 
 ```
@@ -283,3 +320,21 @@ The results for the ResNet50 model with hyperparameter tuning are as follows:
 ### Model 2: Custom CNN
 
 Training results of the custom CNN model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
+
+```
+              precision    recall  f1-score   support
+
+         PTE       0.44      0.57      0.50        86
+          LO       0.66      0.60      0.63        88
+          EO       0.59      0.65      0.62        78
+        IPTE       0.80      0.60      0.68        67
+          IO       0.96      0.87      0.91        85
+
+    accuracy                           0.66       404
+   macro avg       0.69      0.66      0.67       404
+weighted avg       0.69      0.66      0.67       404
+```
+
+![Neuroflux confusion matrix](./images/neuroflux/confusion_matrix_no_optuna.png)
+![Neuroflux roc curves](./images/neuroflux/roc_curves_no_optuna.png)
+![Neuroflux training curves](./images/neuroflux/training_curves_no_optuna.png)

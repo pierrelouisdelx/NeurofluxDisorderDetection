@@ -4,5 +4,11 @@
     "weight_decay": 1e-4,
     "num_epochs": 50,
     "model_save_path": "saved_models/resnet50_model.pth",
-    "batch_size": 64
+    "batch_size": 16,
+    "lr_factor": 0.5,
+    "lr_patience": 3,
+    "hyperparams": {
+        "hidden_size": 512,
+        "dropout_rate": 0.6
+    }
 }
