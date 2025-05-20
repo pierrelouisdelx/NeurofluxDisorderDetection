@@ -24,7 +24,7 @@ This project implements two deep learning models to classify medical images into
 │   └── IPTE/              # Neuroflux disorder with intermediate polyglutamine tract expansion images
 ├── README.md
 ├── src
-│   ├── dataset.py        # PyTorch Dataset implementation for loading and preprocessing medical images
+│   ├── dataset.py        # PyTorch Dataset implementation for loading and preprocessing images
 │   ├── hyperparameter_tuning.py  # Hyperparameter tuning using optuna
 │   ├── __init__.py       # Python package marker file
 │   ├── main.py           # Entry point of the application, handles CLI and orchestrates workflows
@@ -43,6 +43,8 @@ This project implements two deep learning models to classify medical images into
 ├── uv.lock              # Dependency lock file for uv package manager
 └── pyproject.toml       # Project configuration and dependencies
 ```
+
+# Getting Started
 
 ## Requirements
 
@@ -67,6 +69,16 @@ In order to install the dependencies uv is required. If you do not have uv insta
 
 ```bash
 uv sync
+```
+
+## Downloading the Dataset
+
+The dataset can be downloaded from [https://cdn.orbs.cloud/data.zip](https://cdn.orbs.cloud/data.zip).
+Extract the zip file in the root of the repository.
+
+```bash
+wget https://cdn.orbs.cloud/data.zip
+unzip data.zip
 ```
 
 ## Usage
@@ -172,6 +184,8 @@ python src/main.py predict --image path/to/image.jpg --dataset_config configs/da
 In order to be able to use the models with Docker, nvidia-container-toolkit is required. Please refer to the [installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) for more information.
 
 ### Building the Docker Image
+
+:warning: The dockerfile is using the pytorch/pytorch:2.7.0-cuda12.6-cudnn9-devel image. This image is using cuda 12.6 and cudnn 9.0, please check your GPU to see if it is compatible with this version. If you want to use a different version of cuda and cudnn, you can change the image in the dockerfile.
 
 ```bash
 docker build -t neuroflux-detection .
@@ -319,6 +333,8 @@ weighted avg       0.81      0.81      0.81       404
 
 The results for the ResNet50 model with hyperparameter tuning are as follows:
 
+**_Coming soon_**
+
 ### Model 2: Custom CNN
 
 Training results of the custom CNN model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
@@ -340,3 +356,7 @@ weighted avg       0.69      0.66      0.67       404
 ![Neuroflux confusion matrix](./images/neuroflux/confusion_matrix_no_optuna.png)
 ![Neuroflux roc curves](./images/neuroflux/roc_curves_no_optuna.png)
 ![Neuroflux training curves](./images/neuroflux/training_curves_no_optuna.png)
+
+The results for the Neuroflux model with hyperparameter tuning are as follows:
+
+**_Coming soon_**
