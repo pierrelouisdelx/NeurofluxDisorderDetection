@@ -284,22 +284,61 @@ Trainable params: 13,235,013
 Non-trainable params: 0
 Total mult-adds (Units.MEGABYTES): 752.84
 ==========================================================================================
-Input size (MB): 0.60
-Forward/backward pass size (MB): 24.09
-Params size (MB): 52.94
-Estimated Total Size (MB): 77.63
-==========================================================================================
 ```
 
 ## Hyperparameter Tuning
 
-Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle and google colab. In order to run the hyperparameter tuning, the `src/hyperparameter_tuning.py` file can be used.
+Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle. In order to run the hyperparameter tuning, the `src/hyperparameter_tuning.py` file can be used.
 
 ```bash
 uv run src/hyperparameter_tuning.py --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
-After having trained the models, the best hyperparameters were found to be:
+## Hyperparameter Tuning Details
+
+The hyperparameter tuning process uses Optuna to optimize several key parameters for both models. Here's a detailed breakdown of the tuned hyperparameters:
+
+### Common Hyperparameters for Both Models
+
+1. **Optimizer Selection and Parameters**:
+
+    - Optimizer type: Adam, AdamW, SGD, or RMSprop
+    - Learning rate: 1e-5 to 1e-3 (log scale)
+    - Weight decay: 1e-5 to 1e-3 (log scale)
+    - For Adam/AdamW: beta1 (0.8-0.99) and beta2 (0.9-0.9999)
+    - For SGD: momentum (0.8-0.99) and nesterov momentum (True/False)
+    - For RMSprop: momentum (0.8-0.99) and alpha (0.8-0.99)
+
+2. **Learning Rate Scheduler**:
+
+    - Scheduler type: ReduceLROnPlateau, CosineAnnealingLR, or OneCycleLR
+    - For ReduceLROnPlateau:
+        - Factor: 0.1-0.5
+        - Patience: 3-10 epochs
+        - Minimum learning rate: 1e-6 to 1e-4
+    - For CosineAnnealingLR:
+        - T_max: 10-100
+        - Minimum learning rate: 1e-6 to 1e-4
+    - For OneCycleLR:
+        - Maximum learning rate: 1e-4 to 1e-2
+        - Total steps: 100-1000
+        - Percentage of warmup: 10-30%
+        - Division factors: 10-100 (initial), 100-1000 (final)
+
+3. **Training Parameters**:
+    - Batch size: 16, 32, or 64
+    - Dropout rate: 0.3 to 0.7
+
+### Model-Specific Hyperparameters
+
+1. **ResNet50 Model**:
+
+    - Hidden size: 256, 512, or 1024 (for the custom classification head)
+
+2. **Custom Neuroflux Model**:
+    - Convolutional channels: 16, 32, or 64 (for the initial convolutional layer)
+
+The optimization process runs for 50 trials with a 1-hour timeout, using validation accuracy as the optimization metric. The best hyperparameters are saved in JSON format in the `output/hyperparameter_tuning` directory.
 
 ## Performance Metrics
 
@@ -315,20 +354,21 @@ The models are evaluated using multiple metrics:
 
 ### Model 1: Transfer Learning with ResNet50
 
-Training results of the transfer learning using the ResNet50 model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
+Training results of the transfer learning using the ResNet50 model without any hyperparameter tuning on an T4 GPU on Kaggle are as follows:
 
 ```
               precision    recall  f1-score   support
 
-         PTE       0.69      0.70      0.69        86
-          LO       0.79      0.83      0.81        98
-          EO       0.74      0.73      0.73        77
-        IPTE       0.95      0.81      0.87        67
-          IO       0.91      0.99      0.95        76
+         PTE       0.84      0.60      0.70        86
+          LO       0.79      0.91      0.84        98
+          EO       0.84      0.87      0.85        77
+        IPTE       0.83      0.87      0.85        67
+          IO       0.96      1.00      0.98        76
 
-    accuracy                           0.81       404
-   macro avg       0.82      0.81      0.81       404
-weighted avg       0.81      0.81      0.81       404
+    accuracy                           0.85       404
+   macro avg       0.85      0.85      0.85       404
+weighted avg       0.85      0.85      0.84       404
+
 ```
 
 ![ResNet50 confusion matrix](./images/resnet50/confusion_matrix_no_optuna.png)
@@ -341,7 +381,7 @@ The results for the ResNet50 model with hyperparameter tuning are as follows:
 
 ### Model 2: Custom CNN
 
-Training results of the custom CNN model without any hyperparameter tuning on an Nvidia GeForce RTX 3050 Ti GPU are as follows:
+Training results of the custom CNN model without any hyperparameter tuning on an T4 GPU on Kaggle are as follows:
 
 ```
               precision    recall  f1-score   support
