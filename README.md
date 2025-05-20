@@ -96,6 +96,8 @@ If you want to skip the training part, you can download the pre-trained models f
 
 ### Training Models
 
+:warning: The training on the custom model is sometimes unstable and the model may not converge. I am still trying to figure out why this is happening. If your model does not converge, please download the pre-trained model from the link above. This issue does not happen with the ResNet50 model.
+
 The dataset configuration file is located in the `configs` folder. It has a very simple structure:
 
 ```json

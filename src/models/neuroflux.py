@@ -21,7 +21,7 @@ class NeurofluxModel(nn.Module):
         )
         self.pool = nn.MaxPool2d(2, 2)
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(256 * 14 * 14, 256)
+        self.fc1 = nn.Linear(conv_channels * 8 * 14 * 14, 256)
         self.dropout = nn.Dropout(dropout_rate)
         self.fc2 = nn.Linear(256, num_classes)
 
