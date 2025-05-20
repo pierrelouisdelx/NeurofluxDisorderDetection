@@ -180,7 +180,7 @@ docker build -t neuroflux-detection .
 ### Running with Docker
 
 ```bash
-docker run neuroflux-detection [train|evaluate|predict] --dataset_config configs/dataset_config.json --model_config <model_config>
+docker run --gpus all neuroflux-detection [train|evaluate|predict] --dataset_config configs/dataset_config.json --model_config <model_config>
 ```
 
 # Data Preparation
