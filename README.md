@@ -168,7 +168,7 @@ tensorboard --logdir=output/runs
 To evaluate the model performances:
 
 ```bash
-python src/main.py evaluate --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
+uv run src/main.py evaluate --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ### Prediction
@@ -176,7 +176,7 @@ python src/main.py evaluate --dataset_config configs/dataset_config.json --model
 To predict the phase of a new MRI scan:
 
 ```bash
-python src/main.py predict --image path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
+uv run src/main.py predict --image_path path/to/image.jpg --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
 ```
 
 ## Docker Usage
