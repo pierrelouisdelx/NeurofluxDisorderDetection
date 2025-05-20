@@ -80,6 +80,8 @@ Modes:
 -   `evaluate`: Evaluate the model on test data
 -   `predict`: Make predictions on a single image
 
+If you want to skip the training part, you can download the pre-trained models from [https://cdn.orbs.cloud/resnet50_model.pth](https://cdn.orbs.cloud/resnet50_model.pth) and [https://cdn.orbs.cloud/neuroflux_model.pth](https://cdn.orbs.cloud/neuroflux_model.pth) and put them in the `output/saved_models` folder.
+
 ### Training Models
 
 The dataset configuration file is located in the `configs` folder. It has a very simple structure:
