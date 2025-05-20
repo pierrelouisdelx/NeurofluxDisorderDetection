@@ -342,15 +342,16 @@ Training results of the custom CNN model without any hyperparameter tuning on an
 ```
               precision    recall  f1-score   support
 
-         PTE       0.44      0.57      0.50        86
-          LO       0.66      0.60      0.63        88
-          EO       0.59      0.65      0.62        78
-        IPTE       0.80      0.60      0.68        67
-          IO       0.96      0.87      0.91        85
+         PTE       0.56      0.58      0.57        86
+          LO       0.79      0.64      0.71        98
+          EO       0.67      0.78      0.72        77
+        IPTE       0.86      0.81      0.83        67
+          IO       0.88      0.95      0.91        76
 
-    accuracy                           0.66       404
-   macro avg       0.69      0.66      0.67       404
-weighted avg       0.69      0.66      0.67       404
+    accuracy                           0.74       404
+   macro avg       0.75      0.75      0.75       404
+weighted avg       0.75      0.74      0.74       404
+
 ```
 
 ![Neuroflux confusion matrix](./images/neuroflux/confusion_matrix_no_optuna.png)

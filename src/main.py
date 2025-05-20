@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from PIL import Image
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import NeurofluxDataset
@@ -123,8 +123,20 @@ def main():
         class_names=dataset_cfg.get("class_names"),
     )
 
+    # Calculate class weights for balanced sampling
+    class_counts = pd.Series(train_labels).value_counts()
+    class_weights = 1.0 / class_counts
+    sample_weights = [class_weights[label] for label in train_labels]
+    sampler = WeightedRandomSampler(
+        weights=sample_weights,
+        num_samples=len(train_labels),
+        replacement=True
+    )
+
     train_loader = DataLoader(
-        train_dataset, batch_size=model_cfg.get("batch_size"), shuffle=True
+        train_dataset, 
+        batch_size=model_cfg.get("batch_size"), 
+        sampler=sampler
     )
     val_loader = DataLoader(
         val_dataset, batch_size=model_cfg.get("batch_size"), shuffle=False
