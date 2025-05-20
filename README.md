@@ -293,7 +293,11 @@ Estimated Total Size (MB): 77.63
 
 ## Hyperparameter Tuning
 
-Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle and google colab.
+Optuna was used for hyperparameter tuning to optimize the performance of both models. Training progress was monitored using TensorBoard. All training and hyperparameter tuning were done on a T4 GPU on Kaggle and google colab. In order to run the hyperparameter tuning, the `src/hyperparameter_tuning.py` file can be used.
+
+```bash
+uv run src/hyperparameter_tuning.py --dataset_config configs/dataset_config.json --model_config configs/<model_name>_config.json
+```
 
 After having trained the models, the best hyperparameters were found to be:
 
